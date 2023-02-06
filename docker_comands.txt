@@ -1,0 +1,2 @@
+docker build -t simple_fastapi .
+docker run -d --name simple_fastapi -p 8000:80 simple_fastapi
