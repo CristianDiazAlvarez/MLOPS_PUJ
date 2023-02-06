@@ -1,2 +1,2 @@
-docker build -t simple_fastapi .
-docker run -d --name simple_fastapi -p 8000:80 simple_fastapi
+docker build -t simple_model .
+docker run --name simple_model -p 8000:80 simple_model
