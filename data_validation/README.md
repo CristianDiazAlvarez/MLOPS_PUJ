@@ -11,13 +11,13 @@ Instalation of TFX may be a complex process, that why docker it is usefull tool.
 
 Understand the command:
 
-- -it allow an interactive mode
-- --name tfx set a specific name to the container in this case 'tfx'
-- --rm remove any continer if named as tfx
-- -p publish or expose port host_port:container_port
-- -v mount bind volume as file or folder. host_folder:docker_folder
-- --entrypoint stablish command to run and set container life as this command 
-- tensorflow/tfx define docker image as default search local then on dockerhub
+- **-it** allow an interactive mode
+- **--name tfx** set a specific name to the container in this case 'tfx'
+- **--rm** remove any continer if named as tfx
+- **-p** publish or expose port host_port:container_port
+- **-v** mount bind volume as file or folder. host_folder:docker_folder
+- **--entrypoint** stablish command to run and set container life as this command 
+- **tensorflow/tfx** define docker image as default search local then on dockerhub
 
 ---
 
