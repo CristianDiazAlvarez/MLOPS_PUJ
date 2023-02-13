@@ -4,3 +4,5 @@ __pycache__/
 *.joblib
 .ipynb_checkpoints/
 *.pbtxt
+*.log
+*.pkl
