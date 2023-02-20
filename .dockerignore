@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.csv
+*.joblib
+.ipynb_checkpoints/
+*.pbtxt
+*.log
+*.pkl
+*.data

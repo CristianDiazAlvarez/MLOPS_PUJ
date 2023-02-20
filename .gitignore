@@ -1,8 +1,13 @@
 venv/
 __pycache__/
+pipeline/
 *.csv
 *.joblib
-.ipynb_checkpoints/
+*.ipynb_checkpoints/
+*pipeline/
 *.pbtxt
 *.log
 *.pkl
+*.data
+data/
+*/data/
