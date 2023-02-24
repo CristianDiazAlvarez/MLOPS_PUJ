@@ -1,6 +1,7 @@
 venv/
 __pycache__/
 pipeline/
+Proyecto_1/
 *.csv
 *.joblib
 *.ipynb_checkpoints/
