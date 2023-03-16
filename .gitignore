@@ -12,3 +12,7 @@ Proyecto_1/
 *.data
 data/
 */data/
+mlruns/
+*/mlruns/
+kt_dir/
+*/kt_dir/
