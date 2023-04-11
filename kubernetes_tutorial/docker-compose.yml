@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+
+  ingress:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+  
+  train:
+    build: ./transform_train
+    image: cristiandiaz13/mlops-puj:train
+    restart: always
+    ports:
+      - "8601:8601"
+    networks:
+      - netinference
+      - taller1-net-db
+    environment:
+      - VIRTUAL_HOST=train.com
+
+  inference:
+    build: ./inference
+    image: cristiandiaz13/mlops-puj:inference
+    restart: always
+    ports:
+      - "8602:8602"
+    networks:
+      - netinference
+    environment:
+      - VIRTUAL_HOST=train.com
+
+
+networks:
+  netinference:
+  taller1-net-db:
+    external: true
