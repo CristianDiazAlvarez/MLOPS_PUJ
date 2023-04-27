@@ -2,6 +2,7 @@ venv/
 __pycache__/
 pipeline/
 Proyecto_1/
+Proyecto_2/
 *.csv
 *.joblib
 *.ipynb_checkpoints/
@@ -18,5 +19,6 @@ kt_dir/
 */kt_dir/
 Taller1/
 */Taller1/
-mlflow/
-*/mlflow/
+mlflow/data/
+mlflow/minio/
+*.db
