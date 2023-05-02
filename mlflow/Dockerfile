@@ -1,4 +1,7 @@
 FROM python:3.9
+ARG MLFLOW_S3_ENDPOINT_URL=http://10.43.102.109:9000
+ARG AWS_ACCESS_KEY_ID=admin
+ARG AWS_SECRET_ACCESS_KEY=supersecret
 RUN mkdir /work
 WORKDIR /work
 COPY . .
