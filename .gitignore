@@ -22,3 +22,5 @@ Taller1/
 mlflow/data/
 mlflow/minio/
 *.db
+logs/
+*.env
