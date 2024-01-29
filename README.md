@@ -22,10 +22,10 @@ Los niveles de MLOps inician con un el nivel 0 el cual es un nivel de automatiza
 
 Cada uno de los niveles contiene información sobre procesos, herramientas/tecnologías así como ejemplos y actividades propuestas.
 
-- [Nivel 0](niveles/0/readme.md)
-- [Nivel 1](niveles/1/readme.md)
-- [Nivel 2](niveles/2/readme.md)
-- [Nivel 3](niveles/3/readme.md)
-- [Nivel 4](niveles/4/readme.md)
+- [Nivel 0](niveles/0/README.md)
+- [Nivel 1](niveles/1/README.md)
+- [Nivel 2](niveles/2/README.md)
+- [Nivel 3](niveles/3/README.md)
+- [Nivel 4](niveles/4/README.md)
 
 Finalmente el acá se encuentra el [curso en su ultima versión](https://github.com/CristianDiazAlvarez/MLOPS_PUJ/tree/b14755b644dec27a50709844e356f2fce6e34644) del curso anterior. Recuerde que la estructura cambio completamente y actividades serán diferentes.
