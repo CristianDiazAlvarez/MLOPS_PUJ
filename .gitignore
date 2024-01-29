@@ -25,5 +25,5 @@ mlflow/minio/
 *.db
 logs/
 *.env
-
+.vscode/
 V1/
