@@ -27,3 +27,5 @@ logs/
 *.env
 .vscode/
 V1/
+Soluciones/
+*temp.txt

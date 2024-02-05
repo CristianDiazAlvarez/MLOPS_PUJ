@@ -1,0 +1,2 @@
+docker build -t nivel_0 .
+docker run --name nivel_0 -p 8000:80 nivel_0
