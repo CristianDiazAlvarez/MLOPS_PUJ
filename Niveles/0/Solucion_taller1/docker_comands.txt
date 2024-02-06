@@ -1,2 +1,0 @@
-docker build -t taller_1 .
-docker run --rm --name taller_1 -p 8000:80 taller_1
