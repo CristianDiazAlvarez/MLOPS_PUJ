@@ -93,7 +93,7 @@ Entendiendo el comando de Docker:
 - **`--entrypoint`** comando de establecimiento para ejecutar y establecer la vida útil del contenedor como este comando
 - **`tensorflow/tfx`** define la imagen de docker, primero como búsqueda predeterminada local y luego en DockerHub (o cualquier registro de artefactos indicado)
 
-Cree un archivo `docker-compose.yaml` que ejecute un contenedor de desarrollo basado en el comando de docker descrito anteriormente. Acceda a la interfaz gráfica de Jupyter que despliega este componente y ejecute los ejemplos vistos en clase [TFDV](Niveles/1/Validacion_de_datos/TF/TFDV.ipynb) y [ML_Metadata](Niveles/1/Transformacion_de_datos/ML_Metadata.ipynb).
+Cree un archivo `docker-compose.yaml` que ejecute un contenedor de desarrollo basado en el comando de docker descrito anteriormente. Acceda a la interfaz gráfica de Jupyter que despliega este componente y ejecute los ejemplos vistos en clase [TFDV](../Validacion_de_datos/TF/TFDV.ipynb) y [ML_Metadata](../Transformacion_de_datos/ML_Metadata.ipynb).
 
 Tenga en cuenta que es posible que necesite elementos nuevos en esta imagen, valide el funcionamiento y proponga como agregar los elementos faltantes.
 
