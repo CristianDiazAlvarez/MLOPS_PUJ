@@ -3,14 +3,15 @@ Description=MLflow tracking server
 After=network.target 
 
 [Service]
-User=profesor
+User=estudiante
 Restart=on-failure
 RestartSec=30
+WorkingDirectory=/home/estudiante/MLOPS_PUJ/Niveles/2/mlflow
 Environment=MLFLOW_S3_ENDPOINT_URL=http://10.43.102.109:9000
 Environment=AWS_ACCESS_KEY_ID=admin
 Environment=AWS_SECRET_ACCESS_KEY=supersecret
-ExecStart=/bin/bash -c 'PATH=/home/estudiante/.local/bin/:$PATH exec mlflow server \
---backend-store-uri sqlite:///home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow.db \
+ExecStart=/bin/bash -c 'PATH=/home/estudiante/.local/bin/:$PATH exec python -m mlflow server \
+--backend-store-uri sqlite:////home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow.db \
 --default-artifact-root s3://mlflows3/artifacts \
 --host 0.0.0.0 \
 --serve-artifacts' 

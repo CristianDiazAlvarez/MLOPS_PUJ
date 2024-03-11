@@ -20,6 +20,7 @@ kt_dir/
 */kt_dir/
 Taller1/
 */Taller1/
+*minio/
 mlflow/data/
 mlflow/minio/
 *.db

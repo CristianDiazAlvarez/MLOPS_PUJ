@@ -28,13 +28,13 @@ Una vez instalado mlflow, es cuestión de iniciar el servidor con la siguiente i
 
 ```bash
 mlflow server \
---backend-store-uri sqlite:///home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow.db \
+--backend-store-uri sqlite:////home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow.db \
 --default-artifact-root s3://mlflows3/artifacts \
 --host 0.0.0.0 \
 --serve-artifacts' 
 ```
 
- En donde, `--backend-store-uri` nos permite definir el lugar de almacenamiento de los metadatos de mlflow, asi como sus referencias a artefactos, el parametro `sqlite:///home/profesor/MLOPS/MLOPS_PUJ/mlflow/mlflow.db` corresponde al la ubicación del la base de datos SQLite, en caso de usar una base de datos diferente se deben pasar las credenciales para su suo. 
+ En donde, `--backend-store-uri` nos permite definir el lugar de almacenamiento de los metadatos de mlflow, asi como sus referencias a artefactos, el parametro `sqlite:////home/profesor/MLOPS/MLOPS_PUJ/mlflow/mlflow.db` corresponde al la ubicación del la base de datos SQLite, en caso de usar una base de datos diferente se deben pasar las credenciales para su suo. 
 
 Para el almacenamiento de artefactos usaremos el bucket de s3 instanciado anteriormente, indicandolo mediante `--default-artifact-root`, el parametro `s3://mlflows3/artifacts` indica que se realizara la conexión a un bucket de s3, el cual tiene por nombre **mlflows3** y se usara la carpeta **artifacts** para registro. Para garantizar la visibilidad de los artefactos se agrega `--serve-artifacts`. Por ultimo, para poder acceder a nuestra plataforma, especificamos `--host 0.0.0.0`, por defecto se asigna el puerto 5000.
 
@@ -54,7 +54,7 @@ Environment=MLFLOW_S3_ENDPOINT_URL=http://10.43.102.109:9000
 Environment=AWS_ACCESS_KEY_ID=admin
 Environment=AWS_SECRET_ACCESS_KEY=supersecret
 ExecStart=/bin/bash -c 'PATH=/home/estudiante/.local/bin/:$PATH exec mlflow server \
---backend-store-uri sqlite:///home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow.db \
+--backend-store-uri sqlite:////home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow.db \
 --default-artifact-root s3://mlflows3/artifacts \
 --host 0.0.0.0 \
 --serve-artifacts' 
@@ -74,7 +74,7 @@ sudo systemctl daemon-reload
 Ahora sí, habilite y valide el servicio
 
 ```bash
-sudo systemctl enable home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow_serv.service 
+sudo systemctl enable /home/estudiante/MLOPS_PUJ/Niveles/2/mlflow/mlflow_serv.service 
 sudo systemctl start mlflow_serv.service 
 ```
 Verifique que el servicio funciona adecuadamente
