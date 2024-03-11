@@ -1,0 +1,3 @@
+pycaret==2.3.10
+pandas==1.5.3
+autoviz==0.1.58
