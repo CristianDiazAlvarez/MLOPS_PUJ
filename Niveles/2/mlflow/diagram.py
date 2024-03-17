@@ -9,6 +9,8 @@ from diagrams.onprem.mlops import Mlflow
 graph_attr = {
     "layout":"dot",
     "compound":"true",
+    "size":"10",
+    "pad":"0"
     }
 
 
@@ -21,9 +23,9 @@ with Diagram(name="MLflow Class explanation", show=False, direction="TB", graph_
             cc_minio = Custom("object store", "./images/MINIO_wordmark.png")
 
         with Cluster("systemd_service", direction='LR', graph_attr={"bgcolor":"#F3E2A9"}):
-            with Cluster("server ", graph_attr={"bgcolor":"#F3E2A9"}):
+            with Cluster("server", graph_attr={"bgcolor":"#F3E2A9"}):
                 mlflow_tracking = Mlflow("Tracking")
-            with Cluster("server  ", graph_attr={"bgcolor":"#F3E2A9"}):
+            with Cluster("server ", graph_attr={"bgcolor":"#F3E2A9"}):
                 mlflow_model_registry = Mlflow("Model Registry")
             
             
@@ -48,19 +50,19 @@ with Diagram(name="MLflow Class explanation", show=False, direction="TB", graph_
 
 
     ## VM Connections
-    mlflow_tracking << Edge(color="black", minlen="2", constraint="False") >> mlflow_model_registry
+    mlflow_tracking << Edge(color="black", minlen="2", constraint="False", ltail="cluster_server", lhead="cluster_server ") >> mlflow_model_registry
     mlflow_tracking << Edge(color="black", minlen="2", constraint="False") >> cc_sqlite
 
 
     ## Connections from VM to internet
-    i_cc_minio << Edge(color="black", minlen="2") >> cc_minio
-    i_mlflow << Edge(color="black", minlen="2") >> mlflow_model_registry
-    i_mlflow << Edge(color="black", minlen="2", constraint="False") >> mlflow_tracking
-    i_jupyter << Edge(color="black", minlen="2", constraint="False") >> cc_jupyter
+    i_cc_minio << Edge(color="black", minlen="2", ltail="cluster_mlops-vm-ip:9000", lhead="cluster_docker-compose") >> cc_minio
+    i_mlflow << Edge(color="black", minlen="2", ltail="cluster_mlops-vm-ip:5000", lhead="cluster_server ") >> mlflow_model_registry
+    i_mlflow << Edge(color="black", minlen="2", constraint="False", ltail="cluster_mlops-vm-ip:5000", lhead="cluster_server") >> mlflow_tracking
+    i_jupyter << Edge(color="black", minlen="2", constraint="False", ltail="cluster_mlops-vm-ip:8888", lhead="cluster_from dockerfile") >> cc_jupyter
 
     ## Internet conections
-    i_cc_minio << Edge(color="black", minlen="2", constraint="False") >> i_mlflow
-    i_jupyter << Edge(color="black", minlen="2", constraint="False") >> i_mlflow
+    i_cc_minio << Edge(color="black", minlen="2", constraint="False", ltail="cluster_mlops-vm-ip:9000", lhead="cluster_mlops-vm-ip:5000") >> i_mlflow
+    i_jupyter << Edge(color="black", minlen="2", constraint="False", ltail="cluster_mlops-vm-ip:8888", lhead="cluster_mlops-vm-ip:5000") >> i_mlflow
     
 
     

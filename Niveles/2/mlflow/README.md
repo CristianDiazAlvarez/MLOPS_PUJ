@@ -8,7 +8,7 @@ Para soportar mlflow, en este caso se configurara un servicio usando `systemd` m
 
 En este ejemplo se establecen 3 servicios dentro de la misma máquina virtual pero sin conexión entre ellos. El primero un contenedor mediante un dockerfile que disponibiliza un servicio de JupyerLab en donde se realizará la experimentación. El segundo un almacen de objetos, usando minio, mediante un docker-compose (estos dos conetenedores no tienen conexión por docker-network) y finalmente un servidor de mlflow, en el diagrama se hará enfasis en los componentes de model registry y server tracking que son servidores de servicio independientes, así como una base de datos sqlite representada en un archivo (este servicio es solo por practicidad en us esenario real se debe disponer una base de datos para este fin).
 
-![mlflow_class_explanation](mlflow_class_explanation.png)
+<span style="display:block;text-align:center">![mlflow_class_explanation](mlflow_class_explanation.png)</span>
 
 Esta configuración busca simular un escenario en la nube, en donde no tienen comunicación directa estos servicios, por lo tanto la comunicación se debe realizar mediante sus puertos expuestos a internet, uno por cada servicio. 
 
