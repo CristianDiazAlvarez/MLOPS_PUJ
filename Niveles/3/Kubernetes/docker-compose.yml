@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - netdb
+  
+  train:
+    image: cristiandiaz13/mlops-puj:train
+    restart: always
+    ports:
+      - "8601:8601"
+    networks:
+      - netinference
+      - taller1-net-db
+
+  inference:
+    image: cristiandiaz13/mlops-puj:inference
+    restart: always
+    ports:
+      - "8602:8602"
+    networks:
+      - netinference
+
+
+networks:
+  netinference:
+  taller1-net-db:
+    external: true
