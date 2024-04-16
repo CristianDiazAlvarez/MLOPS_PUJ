@@ -1,0 +1,9 @@
+- Cree una imagen de docker que contenga una API usando FastAPI que permita realizar inferencia a un modelo previamente entrenado.
+    Este modelo (idealmente) debe ser consumido de MLflow (puede tomar lo desarrollado en el Proyecto 2) (imagen de inferencia)
+- Publique el la imagen de inferencia en DockerHub
+- Cree un docker-compose.yaml que le permita usar la imagen publicada.
+- Cree un docker-compose.yaml (diferente) que le permita realizar pruebas de carga a su imagen de inferencia (use Locust)
+- Limite al máximo posible los recursos de su contenedor de inferencia para que soporte 10.000 peticiones.
+
+Bono:
+Cree pruebas unitarias que le permitan validar el correcto funcionamiento de su imagen de inferencia.
