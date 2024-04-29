@@ -1,0 +1,21 @@
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} está probando GitHub Actions 🚀
+on:
+  push:
+    branches:
+      - "main"
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 El trabajo fue activado automáticamente por el evento ${{ github.event_name }}."
+      - run: echo "🐧 ¡Este trabajo ahora se está ejecutando en un servidor ${{ runner.os }} alojado en GitHub!"
+      - run: echo "🔎 El nombre de su rama es ${{ github.ref }} y su repositorio es ${{ github.repository }}."
+      - name: Consultar el código del repositorio
+        uses: actions/checkout@v4
+      - run: echo "💡 El repositorio ${{ github.repository }} se ha clonado en la máquina."
+      - run: echo "🖥️ El flujo de trabajo ya está listo para probar su código en la máquina."
+      - name: Listar archivos en el repositorio
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 El estado de este trabajo es ${{ job.status }}."
