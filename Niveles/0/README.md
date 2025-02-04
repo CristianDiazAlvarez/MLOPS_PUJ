@@ -58,6 +58,8 @@ Los contenedores y las máquinas virtuales tienen beneficios similares de asigna
 
 El uso de los contenedores permite empaquetar y distribuir el código desarrollado, sin embargo, a este punto este código no sabe comunicarse con los sistemas que requieren la respuesta que el modelo entrega, para esto una de las soluciones más común es construir una API, interfaz de programación de aplicaciones.
 
+[Docker](Docker/README.md)
+
 #### API
 
 En el contexto de las API, la palabra aplicación se refiere a cualquier software con una función distinta. La arquitectura de las API suele explicarse en términos de cliente y servidor. La aplicación que envía la solicitud se llama cliente, y la que envía la respuesta se llama servidor.
@@ -65,7 +67,7 @@ En el contexto de las API, la palabra aplicación se refiere a cualquier softwar
 - API REST
 Estas son las API más populares y flexibles que se encuentran en la web actualmente. El cliente envía las solicitudes al servidor como datos. El servidor utiliza esta entrada del cliente para iniciar funciones internas y devuelve los datos de salida al cliente. 
 
-Uno de los framework más utilizados recientemente para la creación de API es [FastAPI](https://fastapi.tiangolo.com)
+Uno de los framework más utilizados recientemente para la creación de API es [Documentación Oficial FastAPI](https://fastapi.tiangolo.com)
 
 
 Al usar FastAPI es posible crear rápidamente una API que permita usar el modelo entrenado, está API recibirá los datos de entrada como petición, está deberá realizar inferencia con modelo entrenado y responder el resultado de inferencia.
@@ -75,3 +77,5 @@ El proceso completo de entrenamiento y puesta en producción utilizando una máq
 ![nivel 0](img/lvl0.svg)
 
 Es importante agregar una aclaración, este curso busca generar explicaciones agnósticas a los proveedores Cloud, independientes a sus servicios o plataformas. Teniendo claro los conceptos el proveedor de infraestructura o servicios es solo una capa de abstracción que puede empaquetar algunos de los pasos o recursos. En ocasiones ofreciendo simplificar procesos o tareas por un costo adicional o la contraprestación de tener contratar infraestructura con ellos.
+
+[FastAPI](FastAPI/README.md)
