@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  ml_service:
+    build: .
+    ports:
+      - "8000:80"
+    volumes:
+      - './app:/app'
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
