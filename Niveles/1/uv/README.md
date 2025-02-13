@@ -64,6 +64,7 @@ uv add numpy pandas
 Este comando resuelve e instala las dependencias, y las añade al archivo pyproject.toml.
 
 **Grupos de Dependencias:** uv permite crear grupos de dependencias, lo cual es útil para separar dependencias de desarrollo y de producción. Para agregar una dependencia al grupo de desarrollo:
+
 ```bash
 uv add --group dev pytest
 ```
@@ -71,19 +72,20 @@ uv add --group dev pytest
 Esto añade `pytest` al grupo de dependencias de desarrollo en el archivo `pyproject.toml`.
 
 **Ejecutar Comandos:** Para ejecutar comandos dentro del entorno del proyecto, utiliza `uv run`. Por ejemplo, para iniciar una sesión interactiva de Python:
+
 ```bash
 uv run python
 ```
 
 O para ejecutar un script específico:
+
 ```bash
 uv run python script.py
 ```
 
 Esto asegura que los comandos se ejecuten dentro del entorno virtual del proyecto, con las dependencias y la versión de Python especificadas.
 
-
-# Ejemplo de Uso de **uv** 
+## Ejemplo de Uso de **uv**
 
 En este ejemplo, exploraremos cómo utilizar **uv** para gestionar dependencias en un proyecto de FastAPI con un modelo de Machine Learning. Mostraremos dos casos de uso:
 

@@ -1,4 +1,5 @@
 # Taller 2
+
 Para este proceso se entrega la configuración de un ambiente de desarrollo usando una imagen pre-construida de TensorFlow pero solo especificado en un ambiente comando de Docker.
 
 ```Docker
@@ -12,8 +13,8 @@ Entendiendo el comando de Docker:
 - **`--rm`** Al detener la ejecución de este contenedor lo elimina
 - **`-p`** publicar o exponer el puerto puerto_maquina_anfitriona:puerto_del_contenedor
 - **`-v`** montar el volumen de enlace como archivo o carpeta. carpeta_host: carpeta_docker
-    - **`$PWD`** selecciona la carpeta actual de ejecución como punto de montaje del volumen
-    - **`/tfx/src`** Establece cual es la carpeta dentro del contenedor que
+  - **`$PWD`** selecciona la carpeta actual de ejecución como punto de montaje del volumen
+  - **`/tfx/src`** Establece cual es la carpeta dentro del contenedor que
 - **`--entrypoint`** comando de establecimiento para ejecutar y establecer la vida útil del contenedor como este comando
 - **`tensorflow/tfx`** define la imagen de docker, primero como búsqueda predeterminada local y luego en DockerHub (o cualquier registro de artefactos indicado)
 

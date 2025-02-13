@@ -7,11 +7,13 @@ Las transformaciones pueden incluir tareas como la normalización o escalado de 
 Un proceso de transformación de datos bien diseñado no solo mejora la precisión y eficiencia del modelo, sino que también facilita la interpretabilidad de los resultados y la reproducibilidad del análisis. Por ello, es fundamental comprender las técnicas de transformación y su impacto en el rendimiento de los modelos de machine learning.
 
 ## TensorFlow Transform
+
 TensorFlow Transform (TFT) es una herramienta que permite realizar transformaciones de datos a gran escala de manera eficiente y coherente tanto durante el entrenamiento de modelos de machine learning como en su despliegue en producción. Facilita tareas como la normalización, generación de variables derivadas y manejo de valores faltantes, asegurando que las transformaciones aplicadas en la fase de entrenamiento se reproduzcan exactamente en el entorno de inferencia, lo que mejora la consistencia y el rendimiento del modelo.
 
 ```bash
 docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 ```
+
 - `docker` rmi: Comando para eliminar imágenes de Docker.
 - `$(...)`: Permite ejecutar un comando dentro de otro. En este caso, se listan las imágenes colgantes y se pasan como argumento para eliminarlas.
 - `docker images`: Lista las imágenes almacenadas localmente en Docker.
@@ -33,8 +35,8 @@ docker build -t tfx_custom .
 
 - `docker run`: Comando para crear y ejecutar un nuevo contenedor basado en una imagen.
 - `-it`: Combina dos opciones:
-    - `-i (interactivo)`: Mantiene la entrada estándar abierta.
-    - `-t (pseudo-TTY)`: Asigna una terminal interactiva, permitiendo la interacción directa con el contenedor.
+  - `-i (interactivo)`: Mantiene la entrada estándar abierta.
+  - `-t (pseudo-TTY)`: Asigna una terminal interactiva, permitiendo la interacción directa con el contenedor.
 - `--name tfx_custom`: Asigna un nombre personalizado al contenedor (tfx_custom), lo que facilita su gestión en lugar de usar el ID generado automáticamente.
 - `-e TZ=America/Bogota`: Establece una variable de entorno (TZ) dentro del contenedor, configurando la zona horaria a America/Bogota.
 - `--rm`: Indica que el contenedor se eliminará automáticamente después de detenerse, evitando la acumulación de contenedores inactivos.
