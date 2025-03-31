@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  # Servicio para probar limitación de memoria
+  memoria-limitada:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: test_memoria
+    command: python oom_test.py
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: "no"
+
+  # Servicio para probar limitación de CPU
+  cpu-limitada:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: test_cpu
+    command: python cpu_test.py
+    deploy:
+      resources:
+        limits:
+          cpus: 0.25
+    restart: "no"

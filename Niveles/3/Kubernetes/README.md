@@ -1,17 +1,17 @@
 # Kubernetes
 
-
 [Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way).
 
 Kubernetes, también conocido como K8s, es un sistema de código abierto para automatizar la implementación, el escalado y la gestión de aplicaciones en contenedores.
 
-
 Agrupa los contenedores que componen una aplicación en unidades lógicas para facilitar la gestión y el descubrimiento. Kubernetes se basa en 15 años de experiencia en la ejecución de cargas de trabajo de producción en Google, combinado con las mejores ideas y prácticas de la comunidad.
 
 ---
+
 ## Instalación
 
-### Minikube:
+### Minikube
+
 Es una distribución de Kubernetes orientada a nuevos usuarios y trabajo de desarrollo. Sin embargo, no está diseñado para implementaciones de producción, ya que solo puede ejecutar un clúster de un solo nodo en su máquina. [Instrucciones de instalación](https://minikube.sigs.k8s.io/docs/start/).
 
 

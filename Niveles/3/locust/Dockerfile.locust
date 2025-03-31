@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+WORKDIR /locust
+
+COPY locustfile.py /locust
+COPY requirements-locust.txt /locust
+
+RUN pip install --no-cache-dir -r requirements-locust.txt
+
+EXPOSE 8089
+
+CMD ["locust", "-f", "locustfile.py"]

@@ -1,30 +1,9 @@
-version: '3'
+version: "3.8"
 
 services:
-  locustmaster:
-    image: locustio/locust
-    container_name: locustmaster
+  api-inferencia:
     build: .
+    container_name: api-inferencia
     ports:
-     - "8089:8089"
-    volumes:
-      - ./:/mnt/locust
-    command: -f /mnt/locust/locustfile.py --master -H http://locustmaster:8089
-    networks:
-      - network1
-  
-  locustworker:
-    image: locustio/locust
-    container_name: locustworker
-    build: .
-    volumes:
-      - ./:/mnt/locust
-    command: -f /mnt/locust/locustfile.py --worker --master-host locustmaster
-    networks:
-      - network1
-networks:
-  network1:
-    name: p2_default
-    external: true
-
-## docker compose up --build 
+      - "8000:8000"
+    restart: unless-stopped
