@@ -28,6 +28,7 @@ logs/
 *.env
 .vscode/
 V1/
+temp/
 Soluciones/
 *temp.txt
 Niveles/0/Solucion_taller1/
