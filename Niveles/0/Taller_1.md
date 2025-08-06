@@ -1,9 +1,8 @@
-## Taller
+# Taller
 
-Descargue los datos asociados en el aula virtual.
+Utilice la librería [palmerpenguins](https://pypi.org/project/palmerpenguins/) para descargar los datos.
 
-
-- Cree un archivo en Python consuma estos datos y realice las dos etapas, procesamiento de datos y creación de modelo. Considere usar como guía las sub-etapas listadas. 
+- Cree un archivo en Python consuma estos datos y realice las dos etapas, procesamiento de datos y creación de modelo. Considere usar como guía las sub-etapas listadas.
 - Cree un API usando FastAPI permita hacer inferencia al modelo entrenado.
 - Cree la imagen del contenedor con el API creada. Exponga el API en puerto 8989.
 
