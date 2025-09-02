@@ -36,10 +36,11 @@ Para continuar con la exploración de airflow, se propone crear un workflow. Par
 Usando docker compose:
 
 1. Cree una instancia de una base de datos de preferencia (sugerencia: mysql)
+	- Esta base de datos debe ser exclusiva para datos, los metadatos de airflow deben estar en una diferente.
 
-2. Cree una instancia de Airflow
+2. Cree una instancia de Airflow.
 
-3. Cree los DAG necesarios que le permitan:
+3. Cree un DAG (con multiples tareas) que le permitan:
 	- Borrar contenido base de datos
     - Cargar datos de penguins a la base de datos, sin preprocesamiento!
 	- Realizar preprocesamiento para entrenamiento de modelo
