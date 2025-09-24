@@ -29,7 +29,7 @@ APP_DESCRIPTION = (
     https://github.com/CristianDiazAlvarez/MLOPS_PUJ/tree/main/Niveles/2/P2
 
     Diagrama ilustrativo del flujo de batches (GitHub):
-    https://raw.githubusercontent.com/CristianDiazAlvarez/MLOPS_PUJ/main/Niveles/2/P2/images/project_2.png
+    https://raw.githubusercontent.com/CristianDiazAlvarez/MLOPS_PUJ/refs/heads/main/Niveles/2/P2/images/p2_data.png
     
     Orden de las columnas en el CSV:
     # Elevation,
