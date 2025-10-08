@@ -92,4 +92,4 @@ docker-compose -f docker-compose.locust.yaml up --build
 - Cree un docker-compose.yaml (diferente) que le permita realizar pruebas de carga a su imagen de inferencia (use Locust)
 - Límite los recursos de su contenedor de inferencia al mínimo posible para que soporte 10.000 usuarios agregando 500 cada vez.
 
-- Cuando se encuentre los recursos mínimos para soportar esta carga, incremente la cantidad de replicas de la API en el docker compose y describa el comportamiento, ¿es posible reducir más los recursos?
+- Cuando se encuentre los recursos mínimos para soportar esta carga, incremente la cantidad de replicas de la API en el docker compose y describa el comportamiento, ¿Es posible reducir más los recursos? ¿Cuál es la mayor cantidad de peticiones soportadas? ¿Qué diferencia hay entre una o multiples instancias?
