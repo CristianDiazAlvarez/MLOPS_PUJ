@@ -29,7 +29,7 @@ Interactuar con su clúster
 Si ya tiene instalado kubectl, ahora puede usarlo para acceder a su nuevo y brillante clúster:
 
 ```bash
-    kubectl get po -A
+    minikube kubectl -p puj -- get all
 ```
 
 ### micrk8s
@@ -48,7 +48,9 @@ Validar el estado, revisar cuando kubernetes inicie y este listo
     microk8s status --wait-ready
 ```
 
-Empezar a usar kubernetes
+## Empezar a usar kubernetes
+
+Si se usa minikube se reemplaza 'microk8s kubectl' por 'minikube kubectl -p puj --'
 
 ```bash
 microk8s kubectl get all --all-namespaces
