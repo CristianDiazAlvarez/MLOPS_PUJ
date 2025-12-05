@@ -69,3 +69,19 @@ Entendiendo el comando de Docker:
 ---
 
 El [Notebook **pycaret**](PYCARET/pycaret.ipynb) muestra un ejemplo sobre datos de diabetes sobre cómo usar **pycaret** según el ejemplo de Docs.
+
+---
+## PySpark
+
+notebook documentado con el dataset real de Kaggle **“Ecommerce events history in cosmetics shop”**. Ubica el material en [PySpark](PySpark/):
+
+Pasos rápidos:
+
+```bash
+cd PySpark
+curl -L -o data/raw/ecommerce-events-history-in-cosmetics-shop.zip \\
+  https://www.kaggle.com/api/v1/datasets/download/mkechinov/ecommerce-events-history-in-cosmetics-shop
+docker compose up spark-master spark-worker-1 spark-worker-2 pyspark-notebook
+# abre http://localhost:8888 (token mlops) y ejecuta el notebook con master local[*] o spark://spark-master:7077
+```
+

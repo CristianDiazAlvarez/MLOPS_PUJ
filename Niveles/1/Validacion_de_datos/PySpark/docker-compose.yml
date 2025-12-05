@@ -1,0 +1,81 @@
+version: "3.9"
+
+services:
+  spark-master:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: spark-master
+    user: root
+    environment:
+      - SPARK_NO_DAEMONIZE=1
+      - SPARK_LOCAL_DIRS=/tmp/spark
+      - PYSPARK_PYTHON=/opt/conda/bin/python
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    volumes:
+      - ./:/opt/project
+    command: >
+      bash -lc "/usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master
+      --host spark-master --port 7077 --webui-port 8080"
+
+  spark-worker-1:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: spark-worker-1
+    user: root
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_NO_DAEMONIZE=1
+      - SPARK_LOCAL_DIRS=/tmp/spark
+      - PYSPARK_PYTHON=/opt/conda/bin/python
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./:/opt/project
+    command: >
+      bash -lc "/usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077 --cores 2 --memory 2G --port 7001 --webui-port 8081"
+
+  spark-worker-2:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: spark-worker-2
+    user: root
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_NO_DAEMONIZE=1
+      - SPARK_LOCAL_DIRS=/tmp/spark
+      - PYSPARK_PYTHON=/opt/conda/bin/python
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./:/opt/project
+    command: >
+      bash -lc "/usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077 --cores 2 --memory 2G --port 7002 --webui-port 8082"
+
+  pyspark-notebook:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: pyspark-notebook
+    mem_limit: 3g
+    cpus: 2.0
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - SPARK_DRIVER_HOST=pyspark-notebook
+      - SPARK_LOCAL_IP=pyspark-notebook
+      - SPARK_DRIVER_MEMORY=2g
+      - PYSPARK_PYTHON=/opt/conda/bin/python
+      - PYSPARK_DRIVER_PYTHON=/opt/conda/bin/python
+      - SHARED_PROJECT_DIR=/opt/project
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./:/home/jovyan/work
+      - ./:/opt/project
+    command: >
+      bash -lc "pip install --quiet --no-cache-dir jupyterlab_execute_time &&
+      start-notebook.sh --LabApp.token='mlops'"
