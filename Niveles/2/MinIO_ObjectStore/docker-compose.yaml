@@ -1,0 +1,44 @@
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: supersecret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - minio-net
+    restart: unless-stopped
+
+  jupyter:
+    image: jupyter/scipy-notebook:latest
+    container_name: minio-notebook
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=minio123
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=supersecret
+      - AWS_DEFAULT_REGION=us-east-1
+      - MINIO_ENDPOINT=http://minio:9000
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    depends_on:
+      - minio
+    networks:
+      - minio-net
+    restart: unless-stopped
+
+networks:
+  minio-net:
+    driver: bridge
+
+volumes:
+  minio_data:
+    driver: local

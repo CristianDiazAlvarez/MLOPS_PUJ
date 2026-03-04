@@ -76,7 +76,7 @@ app = FastAPI(
 class BatchResponse(BaseModel):
     """Estructura de respuesta del endpoint /data."""
 
-    group_number: int = Field(..., ge=1, le=10, description="Número de grupo solicitado (1-10)")
+    group_number: int = Field(..., ge=1, le=11, description="Número de grupo solicitado (1-10)")
     batch_number: int = Field(..., description="Índice del batch servido para el grupo")
     data: List[List[str]] = Field(
         ..., description="Filas del dataset (valores en formato string) para la porción solicitada"
@@ -175,16 +175,16 @@ else:
 )
 async def read_data(
     group_number: int = Query(
-        ..., ge=1, le=10, description="Número de grupo asignado (1-10).", example=1
+        ..., ge=1, le=11, description="Número de grupo asignado (1-10).", example=1
     )
 ):
     global timestamps
 
     # Verificar si el número de grupo es válido
-    if group_number < 1 or group_number > 10:
+    if group_number < 1 or group_number > 11:
         raise HTTPException(status_code=400, detail="Número de grupo inválido")
     # Verificar si el número de conteo es adecuado
-    if timestamps[str(group_number)][1] >= 10:
+    if timestamps[str(group_number)][1] >= 11:
         raise HTTPException(status_code=400, detail="Ya se recolectó toda la información minima necesaria")
     
     current_time = time.time()
@@ -214,11 +214,11 @@ async def read_data(
 )
 async def restart_data(
     group_number: int = Query(
-        ..., ge=1, le=10, description="Número de grupo a reiniciar (1-10).", example=1
+        ..., ge=1, le=11, description="Número de grupo a reiniciar (1-10).", example=1
     )
 ):
     # Verificar si el número de grupo es válido
-    if group_number < 1 or group_number > 10:
+    if group_number < 1 or group_number > 11:
         raise HTTPException(status_code=400, detail="Número de grupo inválido")
 
     timestamps[str(group_number)][0] = 0
