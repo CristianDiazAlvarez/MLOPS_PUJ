@@ -86,10 +86,11 @@ docker-compose -f docker-compose.locust.yaml up --build
 ## Taller Locust
 
 - Cree una imagen de docker que contenga una API usando FastAPI que permita realizar inferencia a un modelo previamente entrenado.
-    Este modelo (idealmente) debe ser consumido de MLflow (puede tomar lo desarrollado en el Proyecto 2) (imagen de inferencia)
+    - Este modelo debe ser consumido de MLflow
 - Publique el la imagen de inferencia en DockerHub
 - Cree un docker-compose.yaml que le permita usar la imagen publicada.
 - Cree un docker-compose.yaml (diferente) que le permita realizar pruebas de carga a su imagen de inferencia (use Locust)
 - Límite los recursos de su contenedor de inferencia al mínimo posible para que soporte 10.000 usuarios agregando 500 cada vez.
 
 - Cuando se encuentre los recursos mínimos para soportar esta carga, incremente la cantidad de replicas de la API en el docker compose y describa el comportamiento, ¿Es posible reducir más los recursos? ¿Cuál es la mayor cantidad de peticiones soportadas? ¿Qué diferencia hay entre una o multiples instancias?
+- Si no logra llegar a 10.000 usuarios, ¿Cual es la cantidad máxima alcanzada?
