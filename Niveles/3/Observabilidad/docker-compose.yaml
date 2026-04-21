@@ -24,3 +24,16 @@ services:
       - "8000:8000"
     depends_on:
       - prometheus
+    cpus: 0.25
+    mem_limit: 128m
+    restart: unless-stopped
+
+  locust:
+    image: locustio/locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locust:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --host=http://api:8000
+    depends_on:
+      - api

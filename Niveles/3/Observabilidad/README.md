@@ -5,12 +5,14 @@ Este laboratorio muestra cómo monitorear una API de inferencia con:
 - Instrumentación de aplicación en FastAPI (`/metrics`)
 - Recolección con Prometheus (scrape cada 5s)
 - Visualización en Grafana (dashboard base provisionado)
+- Generación de carga con Locust
 
 ## Arquitectura
 
 - `api` (FastAPI): expone `/predict` y `/metrics`
 - `prometheus`: recolecta métricas desde `api:8000/metrics`
 - `grafana`: consulta Prometheus y muestra dashboards
+- `locust`: genera tráfico contra `api`
 
 ## Métricas de la API
 
@@ -49,12 +51,14 @@ Servicios:
 - API metrics: http://localhost:8000/metrics
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (`admin` / `admin`)
+- Locust: http://localhost:8089
 
-## Generar tráfico de prueba
+## Limites de recursos (API)
 
-```bash
-for i in {1..100}; do curl -s http://localhost:8000/predict > /dev/null; done
-```
+En `docker-compose.yaml`, el servicio `api` está limitado.
+
+- `cpus: 0.25`
+- `mem_limit: 128m`
 
 ## Consultas PromQL
 
