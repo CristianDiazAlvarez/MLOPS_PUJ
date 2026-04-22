@@ -1,0 +1,22 @@
+# Configuracion minima para ambiente local de laboratorio.
+executor: LocalExecutor
+
+env:
+  - name: AIRFLOW__CORE__LOAD_EXAMPLES
+    value: "False"
+
+# Nota: no fijamos tag base de Airflow para evitar incompatibilidades
+# entre version de chart y version de imagen.
+
+# Mantener componentes minimos para pruebas locales.
+workers:
+  replicas: 1
+
+triggerer:
+  enabled: true
+
+postgresql:
+  enabled: true
+
+redis:
+  enabled: false

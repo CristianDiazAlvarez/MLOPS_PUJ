@@ -1,0 +1,3 @@
+# Agregue aqui librerias necesarias para sus DAGs.
+# Ejemplo:
+# pandas==2.2.2

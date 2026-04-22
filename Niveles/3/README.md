@@ -12,7 +12,17 @@ El despliegue de modelos de machine learning en producción requiere gestionar m
 
 [**Kubernetes**](Kubernetes/README.md) será la tecnología utilizada para garantizar la estabilidad y escalabilidad de los modelos en producción.
 
-## 2. Pruebas de Carga y Performance con Locust 📈
+## 2. Airflow en Kubernetes con Helm 🌀
+
+Como continuidad de Airflow en Docker Compose (Nivel 2), en este nivel se migra a una ejecución sobre Kubernetes local usando el Helm Chart oficial.
+
+- **Despliegue base en clúster local** con `kind + helm`.
+- **Validación operativa** de pods, release y UI.
+- **Extensión por imagen custom** para incluir DAGs y dependencias del proyecto.
+
+[**Airflow en Kubernetes**](Airflow/README.md) será la base para orquestación de pipelines en entorno local de laboratorio.
+
+## 3. Pruebas de Carga y Performance con Locust 📈
 
 Una vez desplegados los modelos, es crucial evaluar su rendimiento bajo diferentes cargas de trabajo. **Locust** es una herramienta de código abierto que permite realizar pruebas de carga para evaluar el desempeño de los modelos de machine learning en un entorno de producción.
 
@@ -21,15 +31,15 @@ Una vez desplegados los modelos, es crucial evaluar su rendimiento bajo diferent
 
 [**Locust**](Locust/README.md) se utilizará para validar la escalabilidad de los modelos y garantizar que el sistema pueda manejar grandes volúmenes de solicitudes.
 
-## 3. Monitoreo con Prometheus y Grafana 📊
+## 4. Monitoreo con Prometheus y Grafana 📊
 
 Para mantener la estabilidad y el rendimiento del sistema, es fundamental contar con herramientas de monitoreo. **Prometheus** y **Grafana** permiten recopilar, analizar y visualizar métricas en tiempo real.
 
 - **Prometheus**: Sistema de monitoreo que recolecta métricas de diferentes componentes del sistema, incluyendo consumo de CPU, memoria y tiempo de respuesta de los modelos.
 - **Grafana**: Plataforma de visualización que permite construir dashboards personalizados para monitorear el estado del sistema en producción.
 
-[**Prometheus**](Prometheus/README.md) y [**Grafana**](Grafana/README.md) serán implementados para asegurar la observabilidad de los modelos y la infraestructura.
+[**Observabilidad**](Observabilidad/README.md) integra Prometheus y Grafana para asegurar visibilidad de extremo a extremo.
 
 ---
 
-Al finalizar este nivel, los estudiantes habrán aprendido a automatizar el despliegue de modelos en Kubernetes, evaluar su rendimiento con pruebas de carga y monitorear su estado con herramientas especializadas. Con estas capacidades, los sistemas de machine learning pueden operar de manera confiable y escalable en entornos de producción.
+Al finalizar este nivel, los estudiantes habrán aprendido a automatizar el despliegue de modelos en Kubernetes, orquestar pipelines con Airflow en clúster local, evaluar su rendimiento con pruebas de carga y monitorear su estado con herramientas especializadas.
