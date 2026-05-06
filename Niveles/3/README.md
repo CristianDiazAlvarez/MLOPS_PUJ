@@ -40,6 +40,15 @@ Para mantener la estabilidad y el rendimiento del sistema, es fundamental contar
 
 [**Observabilidad**](Observabilidad/README.md) integra Prometheus y Grafana para asegurar visibilidad de extremo a extremo.
 
+## 5. CI/CD: Pruebas y Automatización 🔁
+
+Para sostener automatización confiable en producción, se requiere validar código antes de integrar y publicar artefactos.
+
+- **Unit Testing con Pytest**: Pruebas unitarias básicas para validar funciones y evitar regresiones.
+- **GitHub Actions**: Workflow para ejecutar pruebas al detectar cambios en rutas específicas y publicar imagen solo en `main` si todos los tests pasan.
+
+[**CI/CD**](CICD/README.md) será el punto de partida para prácticas de calidad y automatización de despliegues.
+
 ---
 
-Al finalizar este nivel, los estudiantes habrán aprendido a automatizar el despliegue de modelos en Kubernetes, orquestar pipelines con Airflow en clúster local, evaluar su rendimiento con pruebas de carga y monitorear su estado con herramientas especializadas.
+Al finalizar este nivel, los estudiantes habrán aprendido a automatizar el despliegue de modelos en Kubernetes, orquestar pipelines con Airflow en clúster local, aplicar pruebas unitarias y flujos básicos de CI/CD, evaluar rendimiento con pruebas de carga y monitorear el sistema con herramientas especializadas.
