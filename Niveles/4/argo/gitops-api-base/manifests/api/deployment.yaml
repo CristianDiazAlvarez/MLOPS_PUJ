@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-api
+  namespace: mlops-api
+  labels:
+    app: simple-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-api
+  template:
+    metadata:
+      labels:
+        app: simple-api
+    spec:
+      containers:
+        - name: simple-api
+          image: hashicorp/http-echo:1.0.0
+          args:
+            - "-text=hola desde argo cd"
+          ports:
+            - containerPort: 5678

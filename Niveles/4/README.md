@@ -32,6 +32,10 @@ En este nivel, los modelos se integran en un flujo completamente automatizado de
 
 [**GitHub Actions**](GitHub_Actions/README.md) y [**ArgoCD**](ArgoCD/README.md) serán utilizadas para optimizar el proceso de integración y despliegue continuo.
 
+Material base disponible:
+- [**Taller CI/CD y GitOps**](argo/Taller_CI_CD.md)
+- [**Tutorial Argo CD + GitOps (local)**](argo/Tutorial_ArgoCD_GitOps.md)
+
 ---
 
 Al finalizar este nivel, los estudiantes habrán aprendido a optimizar la infraestructura de MLOps mediante la gestión avanzada de datos, la implementación de interpretabilidad con SHAP y la automatización completa del despliegue con GitOps. Este nivel representa el estado del arte en la operación de modelos de machine learning en entornos de producción altamente regulados y escalables.
