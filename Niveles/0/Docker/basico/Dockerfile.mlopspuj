@@ -1,0 +1,5 @@
+FROM alpine:latest
+
+COPY archivo_prueba.txt /data/
+
+CMD ["ls", "/data/"]
