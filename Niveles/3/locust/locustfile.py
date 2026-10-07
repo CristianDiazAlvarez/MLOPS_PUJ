@@ -1,5 +1,6 @@
 from locust import HttpUser, task, between
 
+
 class UsuarioDeCarga(HttpUser):
     wait_time = between(1, 2.5)
 
@@ -10,8 +11,25 @@ class UsuarioDeCarga(HttpUser):
             "feature2": 2.1,
             "feature3": 0.8
         }
-        # Enviar una petición POST al endpoint /predict
-        response = self.client.post("/predict", json=payload)
-        # Opcional: validación de respuesta
-        if response.status_code != 200:
-            print("❌ Error en la inferencia:", response.text)
+        # catch_response permite decidir explícitamente si Locust debe registrar
+        # la petición como éxito o como fallo.
+        with self.client.post(
+            "/predict", json=payload, name="/predict", catch_response=True
+        ) as response:
+            if response.status_code != 200:
+                response.failure(
+                    f"HTTP {response.status_code}: {response.text[:200]}"
+                )
+                return
+
+            try:
+                body = response.json()
+            except ValueError:
+                response.failure("La respuesta no contiene JSON válido")
+                return
+
+            if "resultado" not in body:
+                response.failure("La respuesta no contiene el campo 'resultado'")
+                return
+
+            response.success()
