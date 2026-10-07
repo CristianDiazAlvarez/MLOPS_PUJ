@@ -17,7 +17,7 @@ Permite medir tiempos de respuesta y rendimiento de APIs o sitios web, lo que es
 ---
 #### Ejemplo simple
 
-Primeo vamos a asumir que tenemos una API que tiene un endpoint `/predict` que recibe un JSON con los datos de entrada del modelo.
+Primero vamos a asumir que tenemos una API que tiene un endpoint `/predict` que recibe un JSON con los datos de entrada del modelo.
 
 ```python
 from locust import HttpUser, task, between
@@ -33,11 +33,27 @@ class UsuarioDeCarga(HttpUser):
             "feature2": 2.1,
             "feature3": 0.8
         }
-        # Enviar una petición POST al endpoint /predict
-        response = self.client.post("/predict", json=payload)
-        # Opcional: validación de respuesta
-        if response.status_code != 200:
-            print("❌ Error en la inferencia:", response.text)
+        # catch_response permite marcar explícitamente el resultado en Locust.
+        with self.client.post(
+            "/predict", json=payload, name="/predict", catch_response=True
+        ) as response:
+            if response.status_code != 200:
+                response.failure(
+                    f"HTTP {response.status_code}: {response.text[:200]}"
+                )
+                return
+
+            try:
+                body = response.json()
+            except ValueError:
+                response.failure("La respuesta no contiene JSON válido")
+                return
+
+            if "resultado" not in body:
+                response.failure("La respuesta no contiene el campo 'resultado'")
+                return
+
+            response.success()
 
 ```
 
@@ -77,20 +93,71 @@ Ahora para ejecutar locust usariamos el siguiente comando:
 locust -f locustfile.py --host http://localhost:8000
 ```
 
-Sin embargo, por simplicidad se ha creado un docker compose para iniciar la API y Locust
+Sin embargo, por simplicidad se ha creado un Docker Compose para iniciar la API y Locust:
 
 ```bash
-docker-compose -f docker-compose.locust.yaml up --build
+docker compose -f docker-compose.locust.yaml up --build
 ```
+
+En `http://localhost:8089` se configura y ejecuta la prueba. Usar solamente
+`print()` ante una respuesta incorrecta no comunica el fallo a Locust. En este
+ejemplo, `response.failure(...)` aumenta el contador de fallos y conserva el
+motivo en la interfaz y en los reportes. En una ejecución *headless*, Locust
+también termina con un código distinto de cero si se registran errores.
 
 ## Taller Locust
 
-- Cree una imagen de docker que contenga una API usando FastAPI que permita realizar inferencia a un modelo previamente entrenado.
-    - Este modelo debe ser consumido de MLflow
-- Publique el la imagen de inferencia en DockerHub
-- Cree un docker-compose.yaml que le permita usar la imagen publicada.
-- Cree un docker-compose.yaml (diferente) que le permita realizar pruebas de carga a su imagen de inferencia (use Locust)
-- Límite los recursos de su contenedor de inferencia al mínimo posible para que soporte 10.000 usuarios agregando 500 cada vez.
+El objetivo es relacionar las restricciones de CPU y memoria estudiadas en
+[`../Recursos`](../Recursos/) con la capacidad observada mediante una prueba de
+carga. Las pruebas de CPU y memoria de ese ejemplo son independientes y no es
+necesario modificarlas.
 
-- Cuando se encuentre los recursos mínimos para soportar esta carga, incremente la cantidad de replicas de la API en el docker compose y describa el comportamiento, ¿Es posible reducir más los recursos? ¿Cuál es la mayor cantidad de peticiones soportadas? ¿Qué diferencia hay entre una o multiples instancias?
-- Si no logra llegar a 10.000 usuarios, ¿Cual es la cantidad máxima alcanzada?
+1. Cree una imagen Docker que contenga una API FastAPI capaz de realizar
+   inferencia con un modelo previamente entrenado y cargado desde MLflow.
+2. Publique la imagen de inferencia en Docker Hub.
+3. Cree un `docker-compose.yaml` que permita ejecutar la imagen publicada.
+4. Despliegue en una VM la API de inferencia, Nginx como balanceador y los demás
+   servicios que la aplicación necesite, pero **no ejecute Locust en esa misma
+   VM**. Inicie una sola réplica de la API y limítela a 1 CPU y 1 GB de memoria.
+5. Ejecute Locust desde una segunda VM o desde su máquina personal. Ambas
+   máquinas deben poder comunicarse por red. De esta forma, la CPU y la memoria
+   usadas para simular usuarios no compiten con los recursos de la API.
+6. Aumente gradualmente los usuarios concurrentes y determine la cantidad
+   máxima que puede atender una réplica de 1 CPU y 1 GB sin incumplir el criterio
+   de capacidad.
+7. Aumente la API a tres réplicas, cada una con 1 CPU y 1 GB, y repita la misma
+   prueba desde la otra máquina. Mantenga iguales el `locustfile.py`, la tasa de
+   aparición de usuarios, la duración y el criterio de aceptación.
+8. Compare la capacidad máxima, los RPS y los tiempos de respuesta obtenidos con
+   una y con tres réplicas.
+
+Antes de medir, defina un criterio verificable. Por ejemplo: una configuración
+"soporta" la carga si mantiene menos de 1 % de fallos y un percentil 95 (p95)
+menor a 500 ms durante dos minutos. Antes de registrar cada nivel, deje que todos
+los usuarios terminen de aparecer. Registre usuarios concurrentes, RPS,
+peticiones totales, porcentaje de fallos, p95, CPU, memoria y réplicas. No
+confunda usuarios concurrentes con peticiones por segundo: la espera configurada
+en `wait_time` afecta directamente el RPS generado.
+
+Comience con incrementos amplios y, al observar fallos o un aumento fuerte del
+p95, repita con incrementos menores alrededor de ese punto. Vigile también la
+CPU de la máquina que ejecuta Locust. Si esta se satura antes que la VM de la
+API, el resultado describe el límite del generador y no el del servicio.
+
+Use [`locust_limitado`](./locust_limitado/) como preparación en clase. Su README
+explica Nginx, los comandos y la actividad para experimentar con límites de CPU,
+memoria y réplicas. Para el taller evaluado, siga la separación entre máquinas
+descrita en los puntos 4 y 5.
+
+Responda finalmente:
+
+- ¿Cuál es la concurrencia máxima sostenible y cuántos RPS procesa una réplica
+  limitada a 1 CPU y 1 GB?
+- ¿Cuál es la concurrencia máxima sostenible y cuántos RPS procesan tres
+  réplicas con esos mismos límites por réplica?
+- ¿En qué porcentaje cambió la capacidad? ¿El aumento fue cercano a tres veces
+  o aparecieron otros cuellos de botella?
+- ¿Qué recurso se saturó primero y qué evidencia muestran `docker stats`,
+  Locust y la máquina generadora de carga?
+- ¿Qué servicios adicionales —por ejemplo MLflow, base de datos o balanceador—
+  pudieron limitar el resultado?
