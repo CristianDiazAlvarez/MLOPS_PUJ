@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas e Integración Continua</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<style>
+  :root {
+    --navy: #0b2c4a;
+    --navy-2: #13406b;
+    --gold: #f2b52a;
+    --gold-soft: #fdf3dc;
+    --ink: #1c2530;
+    --muted: #5b6875;
+    --line: #dde3ea;
+    --paper: #ffffff;
+    --bg: #e9edf2;
+    --ok: #1f8a5b;
+    --ok-soft: #e3f4ec;
+    --bad: #c2413b;
+    --bad-soft: #fbe7e6;
+    --blue-soft: #e6eef7;
+    --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  body { font-family: "Source Sans 3", system-ui, sans-serif; color: var(--ink); }
+
+  /* Lienzo fijo 16:9 escalado al viewport */
+  #deck { position: absolute; inset: 0; display: grid; place-items: center; }
+  .slide {
+    position: absolute; width: 1280px; height: 720px;
+    background: var(--paper); box-shadow: 0 10px 40px rgba(11,44,74,.18);
+    display: none; flex-direction: column; overflow: hidden;
+    transform-origin: center center;
+  }
+  .slide.active { display: flex; }
+
+  .slide > header {
+    background: var(--navy); color: var(--gold); height: 116px; flex: none;
+    display: flex; align-items: center; padding: 0 64px 0 120px; position: relative;
+  }
+  .slide > header::before {
+    content: ""; position: absolute; left: 44px; top: -10px; width: 38px; height: 150px;
+    background: var(--gold); transform: skewX(-8deg); box-shadow: 4px 0 0 rgba(0,0,0,.15);
+  }
+  .slide > header h2 { margin: 0; font-size: 40px; font-weight: 600; line-height: 1.1; }
+  .slide > header .kicker {
+    position: absolute; right: 64px; top: 50%; transform: translateY(-50%);
+    color: #c9d6e3; font-size: 16px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .body { flex: 1; padding: 34px 64px 50px 120px; font-size: 25px; line-height: 1.38; min-height: 0; }
+  .body p { margin: 0 0 14px; }
+  .body ul { margin: 0; padding-left: 26px; }
+  .body li { margin: 0 0 12px; }
+  .body li::marker { color: var(--gold); }
+  .muted { color: var(--muted); }
+  .small { font-size: 20px; }
+  .xs { font-size: 17px; }
+  b, strong { color: var(--navy); }
+  code.i { font-family: "JetBrains Mono", monospace; font-size: .86em; background: var(--blue-soft); color: var(--navy-2); padding: 1px 6px; border-radius: 4px; }
+
+  .footer {
+    position: absolute; left: 120px; right: 64px; bottom: 14px; display: flex; justify-content: space-between;
+    font-size: 14px; color: #94a1ae;
+  }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+  .cols > * { min-width: 0; }
+  .cols.c-45-55 { grid-template-columns: 45fr 55fr; }
+  .cols.c-40-60 { grid-template-columns: 40fr 60fr; }
+  .cols.c-3 { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .cols.c-4 { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; background: #fff; }
+  .card h3 { margin: 0 0 8px; font-size: 23px; color: var(--navy); }
+  .card p { margin: 0; font-size: 19px; color: var(--muted); line-height: 1.35; }
+  .card.gold { background: var(--gold-soft); border-color: #f1d998; }
+  .card.blue { background: var(--blue-soft); border-color: #cddbea; }
+  .card.ok { background: var(--ok-soft); border-color: #b9e0cc; }
+  .card.bad { background: var(--bad-soft); border-color: #efc2bf; }
+  .card .tag { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--navy-2); margin-bottom: 6px; }
+
+  pre { margin: 0; border-radius: 10px; overflow: hidden; }
+  .terminal { overflow: hidden; }
+  pre code.hljs, pre code {
+    font-family: "JetBrains Mono", monospace; font-size: 15.5px; line-height: 1.5;
+    padding: 16px 20px !important; display: block; background: var(--code-bg); color: #e6edf3; white-space: pre;
+  }
+  .code-title { font-family: "JetBrains Mono", monospace; font-size: 14px; color: #c9d6e3; background: #1b2633; padding: 6px 14px; border-radius: 10px 10px 0 0; }
+  .code-title + pre { border-radius: 0 0 10px 10px; }
+  .code-sm pre code { font-size: 14px; line-height: 1.45; }
+  .code-xs pre code { font-size: 13px; line-height: 1.4; padding: 12px 16px !important; }
+
+  /* Flujo / diagramas con cajas */
+  .flow { display: flex; align-items: stretch; gap: 0; }
+  .flow .step { flex: 1; border-radius: 12px; padding: 14px 16px; text-align: center; font-size: 19px; line-height: 1.3; display: flex; flex-direction: column; justify-content: center; }
+  .flow .step b { display: block; font-size: 21px; margin-bottom: 4px; }
+  .flow .step > span { display: block; }
+  .flow .arrow { flex: none; width: 38px; display: grid; place-items: center; color: var(--navy-2); font-size: 26px; font-weight: 700; }
+  .s-navy { background: var(--navy); color: #fff; } .s-navy b { color: var(--gold); }
+  .s-blue { background: var(--blue-soft); border: 1px solid #cddbea; }
+  .s-gold { background: var(--gold-soft); border: 1px solid #f1d998; }
+  .s-ok { background: var(--ok-soft); border: 1px solid #b9e0cc; }
+  .s-ok b { color: var(--ok); }
+  .s-grey { background: #f3f5f8; border: 1px dashed #b9c4cf; color: var(--muted); }
+
+  /* Portada y separadores */
+  .slide.cover { background: var(--navy); color: #fff; }
+  .slide.cover .wrap { padding: 120px 120px 0; position: relative; height: 100%; }
+  .slide.cover .wrap::before { content: ""; position: absolute; left: 44px; top: -20px; width: 46px; height: 330px; background: var(--gold); transform: skewX(-8deg); }
+  .slide.cover .eyebrow { color: var(--gold); font-size: 22px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+  .slide.cover h1 { font-size: 66px; line-height: 1.05; margin: 18px 0 22px; font-weight: 700; }
+  .slide.cover .sub { font-size: 28px; color: #c9d6e3; max-width: 900px; }
+  .slide.cover .meta { position: absolute; left: 120px; bottom: 60px; font-size: 20px; color: #9fb3c8; }
+  .slide.section { background: var(--navy); color: #fff; }
+  .slide.section .wrap { margin: auto 120px; }
+  .slide.section .num { font-size: 120px; font-weight: 700; color: var(--gold); line-height: 1; }
+  .slide.section h1 { font-size: 58px; margin: 10px 0 14px; }
+  .slide.section p { font-size: 26px; color: #c9d6e3; margin: 0; max-width: 900px; }
+
+  /* Pirámide de pruebas */
+  .pyramid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pyramid div { color: #fff; text-align: center; padding: 12px 8px; font-size: 19px; font-weight: 600; border-radius: 6px; }
+  .pyramid .p1 { width: 34%; background: #6c2d8a; }
+  .pyramid .p2 { width: 56%; background: var(--navy-2); }
+  .pyramid .p3 { width: 78%; background: #1f6d9c; }
+  .pyramid .p4 { width: 100%; background: var(--ok); }
+  .pyr-legend { display: flex; justify-content: space-between; font-size: 16px; color: var(--muted); margin-top: 8px; }
+
+  /* Ciclo MLOps */
+  .cycle { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .cycle .stage { border-radius: 12px; padding: 14px 16px; background: #f6f8fb; border: 1px solid var(--line); }
+  .cycle .stage h4 { margin: 0 0 6px; font-size: 20px; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+  .cycle .stage h4 span { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: var(--navy); font-size: 15px; }
+  .cycle .stage ul { padding-left: 18px; margin: 0; }
+  .cycle .stage li { font-size: 16.5px; margin: 0 0 4px; line-height: 1.3; }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 19px; }
+  table.t th { text-align: left; background: var(--navy); color: #fff; padding: 9px 12px; font-weight: 600; }
+  table.t td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.t tr:nth-child(even) td { background: #f7f9fb; }
+
+  .callout { border-left: 6px solid var(--gold); background: var(--gold-soft); padding: 12px 18px; border-radius: 0 10px 10px 0; font-size: 21px; }
+  .callout.blue { border-color: var(--navy-2); background: var(--blue-soft); }
+  .pill { display: inline-block; padding: 2px 12px; border-radius: 99px; font-size: 16px; font-weight: 700; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .pill.navy { background: var(--navy); color: var(--gold); }
+
+  .terminal { background: #10161d; color: #d7e0ea; border-radius: 10px; font-family: "JetBrains Mono", monospace; font-size: 15px; padding: 14px 18px; line-height: 1.5; white-space: pre; }
+  .terminal .p { color: var(--gold); } .terminal .g { color: #4cc38a; } .terminal .r { color: #f07167; } .terminal .d { color: #7d8b99; }
+
+  .steps-num { counter-reset: n; list-style: none; padding-left: 0 !important; }
+  .steps-num li { counter-increment: n; position: relative; padding-left: 50px; }
+  .steps-num li::before { content: counter(n); position: absolute; left: 0; top: 1px; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: var(--gold); font-weight: 700; font-size: 18px; display: grid; place-items: center; }
+
+  /* Controles */
+  #progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--gold); transition: width .2s; z-index: 10; }
+  #controls { position: fixed; right: 16px; bottom: 12px; opacity: .3; transition: opacity .2s; display: flex; gap: 8px; align-items: center; z-index: 10; font-size: 14px; color: var(--muted); }
+  #controls button { border: 1px solid #c3ccd6; background: #fff; color: var(--navy); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  #controls:hover { opacity: 1; }
+  #controls button:hover { background: var(--gold-soft); }
+  #hint { position: fixed; left: 16px; bottom: 14px; font-size: 13px; color: #8b97a3; z-index: 10; transition: opacity 1s; }
+  @media print {
+    html, body { overflow: visible; background: #fff; }
+    #deck { position: static; display: block; }
+    .slide { display: flex !important; position: relative; transform: none !important; box-shadow: none; page-break-after: always; margin: 0 auto; }
+    #progress, #controls, #hint { display: none; }
+    @page { size: 1280px 720px; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<main id="deck">
+
+<!-- ============================ PORTADA ============================ -->
+<section class="slide cover">
+  <div class="wrap">
+    <div class="eyebrow">MLOps · Nivel 3 · CI/CD</div>
+    <h1>Pruebas unitarias e<br>Integración Continua</h1>
+    <div class="sub">Cómo validar automáticamente una API de Machine Learning con <b style="color:var(--gold)">pytest</b> y llevar esas pruebas a un pipeline con <b style="color:var(--gold)">GitHub Actions</b>.</div>
+    <div class="meta">Operaciones de Machine Learning · Maestría en Inteligencia Artificial · Pontificia Universidad Javeriana</div>
+  </div>
+</section>
+
+<!-- ============================ AGENDA ============================ -->
+<section class="slide">
+  <header><h2>¿Dónde estamos?</h2><span class="kicker">Agenda</span></header>
+  <div class="body">
+    <div class="flow" style="margin-bottom:30px">
+      <div class="step s-grey"><b style="color:var(--muted)">Nivel 3 ya visto</b><span>Kubernetes · Airflow · Locust · Prometheus/Grafana</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-navy"><b>Hoy · CI</b><span>Pruebas unitarias con pytest + GitHub Actions</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-gold"><b>Próxima clase · CD</b><span>GitOps con Argo CD (Nivel 4)</span></div>
+    </div>
+    <div class="cols">
+      <div>
+        <p><b>Parte 1 · Pruebas unitarias</b></p>
+        <ul class="small">
+          <li>Qué son y por qué importan en ML</li>
+          <li>pytest: asserts, errores, parametrización, fixtures, mocks</li>
+          <li>Pruebas para una API de ML (FastAPI)</li>
+          <li>Dónde aplicar pruebas en el ciclo de MLOps</li>
+        </ul>
+      </div>
+      <div>
+        <p><b>Parte 2 · Integración continua</b></p>
+        <ul class="small">
+          <li>CI vs CD</li>
+          <li>Conceptos de GitHub Actions</li>
+          <li>Workflow: tests → build → push a Docker Hub</li>
+          <li>Actividades propuestas</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Niveles/3/CICD</span><span class="n"></span></div>
+</section>
+
+<!-- ============================ SECCIÓN 1 ============================ -->
+<section class="slide section">
+  <div class="wrap">
+    <div class="num">01</div>
+    <h1>Pruebas unitarias</h1>
+    <p>Verificar automáticamente que cada pieza del sistema hace lo que esperamos, antes de que llegue a producción.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <header><h2>¿Qué es una prueba de código?</h2><span class="kicker">Fundamentos</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <p>Un procedimiento que <b>ejecuta el código con entradas conocidas</b> y verifica que la salida sea la <b>esperada</b>.</p>
+        <ul class="small">
+          <li>Detecta errores en etapas tempranas, cuando corregirlos es barato</li>
+          <li>Documenta el comportamiento esperado del código</li>
+          <li>Da confianza para refactorizar y para aceptar cambios de otras personas</li>
+          <li>Es el requisito para automatizar: <b>sin pruebas no hay CI que valga</b></li>
+        </ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;justify-content:center">
+        <div class="code-title">la idea en una línea</div>
+<pre><code class="language-python">assert funcion(entrada_conocida) == salida_esperada</code></pre>
+        <div class="flow" style="margin-top:6px">
+          <div class="step s-blue"><b>Entrada</b><span>datos controlados</span></div>
+          <div class="arrow">→</div>
+          <div class="step s-navy"><b>Código</b><span>función / endpoint</span></div>
+          <div class="arrow">→</div>
+          <div class="step s-ok"><b>Verificación</b><span>¿coincide con lo esperado?</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>¿Por qué son críticas en Machine Learning?</h2><span class="kicker">Motivación</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <div class="callout" style="margin-bottom:20px">En ML los errores rara vez rompen el programa: producen <b>desviaciones silenciosas</b> en métricas y predicciones.</div>
+        <ul class="small">
+          <li><b>Reproducibilidad:</b> mismo código + mismos datos = mismo resultado</li>
+          <li><b>Transformaciones de datos:</b> el preprocesamiento en serving debe ser igual al de entrenamiento</li>
+          <li><b>Regresiones:</b> un cambio pequeño puede degradar el modelo</li>
+          <li><b>Trabajo en equipo:</b> validar cambios de varias personas sin revisar todo a mano</li>
+        </ul>
+      </div>
+      <div>
+        <p class="small"><b>Errores típicos cuando no hay pruebas</b></p>
+        <div style="display:grid;gap:12px">
+          <div class="card bad"><p>Se renombra una columna y la función de features falla… o peor, rellena con ceros</p></div>
+          <div class="card bad"><p>El escalado en la API usa parámetros distintos a los del entrenamiento</p></div>
+          <div class="card bad"><p>El modelo cambia sin explicación al modificar el pipeline</p></div>
+          <div class="card bad"><p>La API acepta valores imposibles (edades negativas) y responde algo</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Tipos de pruebas</h2><span class="kicker">Fundamentos</span></header>
+  <div class="body">
+    <div class="cols c-40-60">
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <div class="pyramid">
+          <div class="p1">E2E</div>
+          <div class="p2">Regresión</div>
+          <div class="p3">Integración</div>
+          <div class="p4">Unitarias</div>
+        </div>
+        <div class="pyr-legend"><span>▲ más lentas y costosas</span><span>▼ más rápidas y numerosas</span></div>
+      </div>
+      <table class="t">
+        <tr><th style="width:26%">Tipo</th><th>Qué valida</th><th style="width:34%">Ejemplo en ML</th></tr>
+        <tr><td><b>Unitaria</b></td><td>Una función o clase aislada</td><td>Función de limpieza o de métricas</td></tr>
+        <tr><td><b>Integración</b></td><td>Cómo interactúan varios módulos</td><td>Carga de datos + preprocesamiento + modelo</td></tr>
+        <tr><td><b>Regresión</b></td><td>Que cambios nuevos no rompan lo existente</td><td>Accuracy actual ≥ accuracy de referencia</td></tr>
+        <tr><td><b>E2E</b></td><td>El flujo completo de uso</td><td>Petición HTTP → predicción → respuesta</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Características de una buena prueba</h2><span class="kicker">Fundamentos</span></header>
+  <div class="body">
+    <div class="cols c-4" style="height:auto;margin-bottom:28px">
+      <div class="card gold"><span class="tag">Repetible</span><h3>Determinista</h3><p>Siempre el mismo resultado con la misma entrada. Fijar semillas (<code class="i">random_state</code>).</p></div>
+      <div class="card gold"><span class="tag">Aislada</span><h3>Independiente</h3><p>No depende de otras pruebas, del orden, de la red ni de una base de datos real.</p></div>
+      <div class="card gold"><span class="tag">Rápida</span><h3>Segundos</h3><p>Si tarda mucho, nadie la ejecuta. Lo lento se marca y se separa.</p></div>
+      <div class="card gold"><span class="tag">Legible</span><h3>Clara</h3><p>El nombre dice qué se prueba y qué se espera. Fácil de mantener.</p></div>
+    </div>
+    <div class="cols">
+      <div>
+        <div class="code-title">✗ difícil de entender</div>
+<pre><code class="language-python">def test_1():
+    assert f(0.95) == "high" and f(0.2) == "low"</code></pre>
+      </div>
+      <div>
+        <div class="code-title">✓ el nombre explica el caso</div>
+<pre><code class="language-python">def test_classify_score_high():
+    assert classify_score(0.95) == "high"</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>pytest: el framework de pruebas de Python</h2><span class="kicker">Herramienta</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <ul class="small">
+          <li>Simple: las pruebas son <b>funciones</b> y se valida con <code class="i">assert</code></li>
+          <li>Mensajes de error detallados cuando un assert falla</li>
+          <li><b>Fixtures</b>, <b>parametrización</b>, <b>marcadores</b> y un ecosistema de plugins (<code class="i">pytest-cov</code>, <code class="i">pytest-mock</code>…)</li>
+        </ul>
+        <p class="small" style="margin-top:20px"><b>Reglas de descubrimiento</b></p>
+        <table class="t xs">
+          <tr><td>Archivos</td><td><code class="i">test_*.py</code> o <code class="i">*_test.py</code></td></tr>
+          <tr><td>Funciones</td><td>empiezan con <code class="i">test_</code></td></tr>
+          <tr><td>Clases</td><td>empiezan con <code class="i">Test</code> (sin <code class="i">__init__</code>)</td></tr>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="terminal"><span class="p">$</span> pip install pytest
+<span class="p">$</span> pytest -q
+<span class="g">......</span>                                   <span class="d">[100%]</span>
+<span class="g">6 passed in 0.02s</span></div>
+        <div class="terminal"><span class="p">$</span> pytest -q
+<span class="g">.....</span><span class="r">F</span>                                   <span class="d">[100%]</span>
+<span class="r">FAILED</span> tests/test_app.py::test_classify_score_high
+  <span class="r">AssertionError: assert 'medium' == 'high'</span>
+<span class="r">1 failed</span>, <span class="g">5 passed</span> in 0.03s</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Primer ejemplo: el demo del repositorio</h2><span class="kicker">unit_testing/demo_app</span></header>
+  <div class="body">
+    <div class="cols code-sm">
+      <div>
+        <div class="code-title">app.py</div>
+<pre><code class="language-python">def normalize_temperature(celsius: float) -&gt; float:
+    """Convierte celsius a fahrenheit."""
+    return round((celsius * 9 / 5) + 32, 2)
+
+def classify_score(score: float) -&gt; str:
+    """Clasifica un score continuo en etiquetas."""
+    if score &lt; 0 or score &gt; 1:
+        raise ValueError("score debe estar entre 0 y 1")
+    if score &gt;= 0.8:
+        return "high"
+    if score &gt;= 0.5:
+        return "medium"
+    return "low"</code></pre>
+        <p class="xs muted" style="margin-top:12px"><code class="i">classify_score</code> es típica de ML: convertir la probabilidad del modelo en una etiqueta de negocio.</p>
+      </div>
+      <div>
+        <div class="code-title">tests/test_app.py</div>
+<pre><code class="language-python">import pytest
+
+from app import classify_score, normalize_temperature
+
+def test_normalize_temperature_freezing_point() -&gt; None:
+    assert normalize_temperature(0) == 32.0
+
+def test_normalize_temperature_boiling_point() -&gt; None:
+    assert normalize_temperature(100) == 212.0
+
+def test_classify_score_high() -&gt; None:
+    assert classify_score(0.95) == "high"
+
+def test_classify_score_medium() -&gt; None:
+    assert classify_score(0.6) == "medium"
+
+def test_classify_score_invalid_range() -&gt; None:
+    with pytest.raises(ValueError):
+        classify_score(1.5)</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Anatomía de una prueba: Arrange · Act · Assert</h2><span class="kicker">Patrón AAA</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <div class="flow" style="flex-direction:column;gap:12px">
+          <div class="step s-blue" style="text-align:left"><b>1 · Arrange (preparar)</b><span>Construir datos de entrada, objetos y dependencias</span></div>
+          <div class="step s-gold" style="text-align:left"><b>2 · Act (ejecutar)</b><span>Llamar a la función o endpoint bajo prueba</span></div>
+          <div class="step s-ok" style="text-align:left"><b>3 · Assert (verificar)</b><span>Comparar el resultado con lo esperado</span></div>
+        </div>
+        <p class="small muted" style="margin-top:18px">Una prueba = <b>un comportamiento</b>. Si falla, el nombre debe decir qué se rompió.</p>
+      </div>
+      <div>
+        <div class="code-title">tests/test_preprocessing.py</div>
+<pre><code class="language-python">from app.preprocessing import validate_features
+
+def test_validate_features_returns_ordered_list():
+    # Arrange
+    payload = {"sepal_length": 5.1, "sepal_width": 3.5,
+               "petal_length": 1.4, "petal_width": 0.2}
+
+    # Act
+    result = validate_features(payload)
+
+    # Assert
+    assert result == [5.1, 3.5, 1.4, 0.2]</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Probar los errores esperados: pytest.raises</h2><span class="kicker">Casos de error</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <p class="small">Validar que el código <b>falla bien</b> es tan importante como validar que funciona.</p>
+        <ul class="small">
+          <li>Entradas fuera de rango</li>
+          <li>Columnas faltantes o con otro nombre</li>
+          <li>Tipos incorrectos, nulos, listas vacías</li>
+        </ul>
+        <div class="callout blue small" style="margin-top:18px"><code class="i">match=</code> valida también el mensaje (acepta expresiones regulares), así no pasa la prueba por un error distinto al esperado.</div>
+      </div>
+      <div>
+        <div class="code-title">app/preprocessing.py</div>
+<pre><code class="language-python">FEATURES = ["sepal_length", "sepal_width",
+            "petal_length", "petal_width"]
+
+def validate_features(data: dict) -&gt; list[float]:
+    missing = [f for f in FEATURES if f not in data]
+    if missing:
+        raise KeyError(f"faltan columnas: {missing}")
+    values = [float(data[f]) for f in FEATURES]
+    if any(v &lt; 0 for v in values):
+        raise ValueError("las medidas no pueden ser negativas")
+    return values</code></pre>
+        <div class="code-title" style="margin-top:14px">tests/test_preprocessing.py</div>
+<pre><code class="language-python">def test_validate_features_missing_column(valid_payload):
+    del valid_payload["petal_width"]
+    with pytest.raises(KeyError, match="petal_width"):
+        validate_features(valid_payload)</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Pruebas parametrizadas</h2><span class="kicker">@pytest.mark.parametrize</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <p class="small">La <b>misma prueba</b> con <b>distintas entradas</b> y salidas esperadas. Ideal para:</p>
+        <ul class="small">
+          <li>Funciones matemáticas, escalado, normalización</li>
+          <li>Umbrales de clasificación</li>
+          <li>Cubrir <b>casos borde</b> sin copiar y pegar</li>
+        </ul>
+        <div class="terminal xs" style="margin-top:16px">test_app.py::test_classify_score[0.95-high] <span class="g">PASSED</span>
+test_app.py::test_classify_score[0.8-high]  <span class="g">PASSED</span>
+test_app.py::test_classify_score[0.79-medium] <span class="g">PASSED</span>
+test_app.py::test_classify_score[0.5-medium] <span class="g">PASSED</span>
+test_app.py::test_classify_score[0.0-low]   <span class="g">PASSED</span></div>
+      </div>
+      <div>
+        <div class="code-title">cada tupla genera una prueba independiente</div>
+<pre><code class="language-python">import pytest
+from app import classify_score
+
+@pytest.mark.parametrize(
+    "score, expected",
+    [
+        (0.95, "high"),
+        (0.8,  "high"),     # borde exacto
+        (0.79, "medium"),
+        (0.5,  "medium"),   # borde exacto
+        (0.0,  "low"),
+    ],
+)
+def test_classify_score(score, expected):
+    assert classify_score(score) == expected
+
+@pytest.mark.parametrize("bad", [-0.1, 1.01, 50])
+def test_classify_score_out_of_range(bad):
+    with pytest.raises(ValueError):
+        classify_score(bad)</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Fixtures y conftest.py</h2><span class="kicker">Datos reutilizables</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <p class="small">Un <b>fixture</b> prepara algo que varias pruebas necesitan: datos, un modelo, un cliente HTTP, una configuración.</p>
+        <ul class="small">
+          <li>Se declara con <code class="i">@pytest.fixture</code></li>
+          <li>Se usa pidiéndolo como <b>argumento</b> de la prueba</li>
+          <li>Cada prueba recibe una copia nueva (scope <code class="i">function</code> por defecto)</li>
+          <li><code class="i">yield</code> permite limpiar después</li>
+          <li>En <code class="i">tests/conftest.py</code> quedan disponibles para todo el directorio, sin importar nada</li>
+        </ul>
+      </div>
+      <div>
+        <div class="code-title">tests/conftest.py</div>
+<pre><code class="language-python">import pytest
+
+@pytest.fixture
+def valid_payload():
+    return {"sepal_length": 5.1, "sepal_width": 3.5,
+            "petal_length": 1.4, "petal_width": 0.2}</code></pre>
+        <div class="code-title" style="margin-top:14px">tests/test_preprocessing.py</div>
+<pre><code class="language-python">@pytest.mark.parametrize("column", ["sepal_length", "petal_width"])
+def test_validate_features_negative_values(valid_payload, column):
+    valid_payload[column] = -1          # se modifica la copia
+    with pytest.raises(ValueError):
+        validate_features(valid_payload)</code></pre>
+        <p class="xs muted" style="margin-top:10px">Fixtures y parametrize se combinan: 2 pruebas, cada una con su propio <code class="i">valid_payload</code>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Aislar dependencias: modelos falsos (mocks)</h2><span class="kicker">Aislamiento</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <p class="small">Una prueba unitaria de la API <b>no debería</b> cargar el modelo real:</p>
+        <ul class="small">
+          <li>el <code class="i">model.pkl</code> puede pesar cientos de MB o vivir en MLflow / MinIO</li>
+          <li>sus predicciones cambian al reentrenar</li>
+          <li>queremos probar la <b>lógica de la API</b>, no el modelo</li>
+        </ul>
+        <div class="callout small" style="margin-top:16px">Se reemplaza por un objeto con la misma interfaz (<code class="i">predict</code>) y una respuesta conocida. La calidad del modelo se prueba aparte.</div>
+      </div>
+      <div>
+        <div class="code-title">tests/conftest.py</div>
+<pre><code class="language-python">class FakeModel:
+    """Modelo falso: siempre predice la clase 0 (setosa)."""
+
+    def predict(self, X):
+        return [0 for _ in X]
+
+@pytest.fixture
+def fake_model():
+    return FakeModel()</code></pre>
+        <div class="code-title" style="margin-top:14px">tests/test_model.py</div>
+<pre><code class="language-python">from app.model import predict_label
+
+def test_predict_label_maps_class_to_name(fake_model):
+    label = predict_label(fake_model, [5.1, 3.5, 1.4, 0.2])
+    assert label == "setosa"</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<!-- ============================ API DE ML ============================ -->
+<section class="slide">
+  <header><h2>Pruebas en una API de ML: estructura</h2><span class="kicker">FastAPI + pytest</span></header>
+  <div class="body">
+    <div class="cols c-40-60">
+      <div class="code-sm">
+        <div class="code-title">ml_api/</div>
+<pre><code class="language-plaintext">ml_api/
+├── app/
+│   ├── __init__.py
+│   ├── main.py            # endpoints FastAPI
+│   ├── model.py           # carga y predicción
+│   └── preprocessing.py   # validación de features
+├── tests/
+│   ├── conftest.py        # fixtures compartidos
+│   ├── test_preprocessing.py
+│   ├── test_model.py
+│   └── test_api.py
+├── model.pkl
+├── pytest.ini             # configuración de pytest
+├── requirements.txt
+└── Dockerfile</code></pre>
+      </div>
+      <div>
+        <p class="small"><b>Separar responsabilidades facilita probar</b></p>
+        <table class="t xs">
+          <tr><th>Módulo</th><th>Qué se prueba</th><th>Tipo</th></tr>
+          <tr><td><code class="i">preprocessing.py</code></td><td>Columnas, rangos, orden de features</td><td>Unitaria</td></tr>
+          <tr><td><code class="i">model.py</code></td><td>Mapeo clase → etiqueta (con modelo falso)</td><td>Unitaria</td></tr>
+          <tr><td><code class="i">main.py</code></td><td>Códigos HTTP, contrato de entrada/salida</td><td>Unitaria / integración</td></tr>
+          <tr><td>modelo real</td><td>Métrica mínima con datos de referencia</td><td>Validación (lenta)</td></tr>
+        </table>
+        <div class="callout blue xs" style="margin-top:12px">Si la lógica vive dentro del endpoint, solo se puede probar por HTTP. Si vive en funciones, se prueba directamente y más rápido.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>API de ML</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>La API a probar</h2><span class="kicker">FastAPI</span></header>
+  <div class="body" style="padding-top:22px">
+    <div class="cols c-45-55 code-sm code-xs">
+      <div>
+        <div class="code-title">app/model.py</div>
+<pre><code class="language-python">import joblib
+
+MODEL_PATH = "model.pkl"
+LABELS = {0: "setosa", 1: "versicolor", 2: "virginica"}
+
+def load_model(path: str = MODEL_PATH):
+    return joblib.load(path)
+
+def predict_label(model, features: list[float]) -&gt; str:
+    pred = model.predict([features])[0]
+    return LABELS[int(pred)]</code></pre>
+        <div class="callout small" style="margin-top:16px">La clave: el modelo llega al endpoint como <b>dependencia</b> (<code class="i">Depends(get_model)</code>). En las pruebas se puede reemplazar.</div>
+      </div>
+      <div>
+        <div class="code-title">app/main.py</div>
+<pre><code class="language-python" style="padding-top:10px !important;padding-bottom:10px !important">from fastapi import Depends, FastAPI, HTTPException
+from pydantic import BaseModel
+from app.model import load_model, predict_label
+from app.preprocessing import validate_features
+
+app = FastAPI(title="Iris API")
+
+class IrisInput(BaseModel):
+    sepal_length: float
+    sepal_width: float
+    petal_length: float
+    petal_width: float
+
+def get_model():
+    return load_model()
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+@app.post("/predict")
+def predict(payload: IrisInput, model=Depends(get_model)):
+    try:
+        features = validate_features(payload.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return {"label": predict_label(model, features)}</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>API de ML</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Probar los endpoints con TestClient</h2><span class="kicker">tests/test_api.py</span></header>
+  <div class="body">
+    <div class="cols c-45-55 code-sm" style="gap:24px">
+      <div>
+        <div class="code-title">tests/conftest.py</div>
+<pre><code class="language-python">import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app, get_model
+
+@pytest.fixture
+def client(fake_model):
+    # reemplaza el modelo real por el falso
+    app.dependency_overrides[get_model] = lambda: fake_model
+    yield TestClient(app)
+    app.dependency_overrides.clear()   # limpieza</code></pre>
+        <ul class="xs" style="margin-top:16px">
+          <li><code class="i">TestClient</code> hace peticiones HTTP en memoria: <b>no hay que levantar uvicorn</b></li>
+          <li><code class="i">dependency_overrides</code> inyecta el modelo falso</li>
+          <li>Requiere <code class="i">httpx</code> en requirements</li>
+        </ul>
+      </div>
+      <div>
+<pre><code class="language-python">def test_health(client):
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+def test_predict_ok(client, valid_payload):
+    response = client.post("/predict", json=valid_payload)
+    assert response.status_code == 200
+    assert response.json() == {"label": "setosa"}
+
+def test_predict_missing_field_returns_422(client, valid_payload):
+    del valid_payload["sepal_width"]
+    response = client.post("/predict", json=valid_payload)
+    assert response.status_code == 422      # validación Pydantic
+
+def test_predict_negative_value_returns_400(client, valid_payload):
+    valid_payload["petal_length"] = -3
+    response = client.post("/predict", json=valid_payload)
+    assert response.status_code == 400      # nuestra validación</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>API de ML</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Validar el modelo: pruebas lentas con marcadores</h2><span class="kicker">@pytest.mark.slow</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <p class="small">Además de la lógica, se puede exigir un <b>rendimiento mínimo</b> al modelo (p. ej. accuracy ≥ 0.90, AUC &gt; 0.75).</p>
+        <ul class="small">
+          <li>Entrenar o evaluar es más lento → se marca como <code class="i">slow</code></li>
+          <li>En cada push: <code class="i">pytest -m "not slow"</code></li>
+          <li>Antes de publicar un modelo: <code class="i">pytest -m slow</code></li>
+          <li><b>Regresión:</b> comparar contra métricas de referencia guardadas en JSON/CSV</li>
+        </ul>
+      </div>
+      <div>
+        <div class="code-title">tests/test_model.py</div>
+<pre><code class="language-python">import pytest
+from sklearn.datasets import load_iris
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+@pytest.mark.slow
+def test_model_meets_minimum_accuracy():
+    X, y = load_iris(return_X_y=True)
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        X, y, test_size=0.3, random_state=42, stratify=y)
+    model = LogisticRegression(max_iter=500).fit(X_tr, y_tr)
+    assert accuracy_score(y_te, model.predict(X_te)) &gt;= 0.90</code></pre>
+        <p class="xs muted" style="margin-top:10px"><code class="i">random_state=42</code> hace la prueba repetible.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>API de ML</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Configurar pytest en el proyecto</h2><span class="kicker">pytest.ini · requirements · cobertura</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <div class="code-title">pytest.ini</div>
+<pre><code class="language-ini">[pytest]
+testpaths = tests
+pythonpath = .
+addopts = -v --strict-markers
+markers =
+    slow: pruebas lentas (entrenamiento / datos grandes)</code></pre>
+        <table class="t xs" style="margin-top:14px">
+          <tr><td><code class="i">testpaths</code></td><td>dónde buscar pruebas</td></tr>
+          <tr><td><code class="i">pythonpath</code></td><td>permite <code class="i">from app.main import app</code></td></tr>
+          <tr><td><code class="i">--strict-markers</code></td><td>error si se usa un marcador no declarado</td></tr>
+        </table>
+        <p class="xs muted" style="margin-top:8px">Equivalente en <code class="i">pyproject.toml</code> bajo <code class="i">[tool.pytest.ini_options]</code>.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div class="code-title">requirements-dev.txt</div>
+<pre><code class="language-plaintext">pytest==8.3.5
+pytest-cov
+httpx          # requerido por TestClient</code></pre>
+        </div>
+        <div class="terminal xs"><span class="p">$</span> pytest -m "not slow" --cov=app
+<span class="d">Name                   Stmts   Miss  Cover</span>
+app/main.py               22      1    95%
+app/model.py               8      1    88%
+app/preprocessing.py       9      0   100%
+<span class="d">------------------------------------------</span>
+TOTAL                     39      2    <span class="g">95%</span>
+<span class="g">9 passed, 1 deselected</span> in 1.39s</div>
+        <p class="xs muted">La cobertura dice qué líneas <b>no</b> se ejecutaron; 100% no garantiza que las pruebas sean buenas.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>API de ML</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Ejecutar las pruebas: local y en contenedor</h2><span class="kicker">Comandos</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <p class="small"><b>Local</b></p>
+        <div class="terminal xs"><span class="p">$</span> python -m venv .venv
+<span class="p">$</span> source .venv/bin/activate
+<span class="p">$</span> pip install -r requirements.txt
+<span class="p">$</span> pytest -q</div>
+        <p class="small" style="margin-top:18px"><b>Opciones útiles</b></p>
+        <table class="t xs">
+          <tr><td><code class="i">-q</code> / <code class="i">-v</code></td><td>salida corta / detallada</td></tr>
+          <tr><td><code class="i">-x</code></td><td>detenerse en el primer fallo</td></tr>
+          <tr><td><code class="i">-k predict</code></td><td>solo pruebas cuyo nombre contiene "predict"</td></tr>
+          <tr><td><code class="i">-m "not slow"</code></td><td>filtrar por marcador</td></tr>
+          <tr><td><code class="i">--lf</code></td><td>repetir solo las que fallaron</td></tr>
+        </table>
+      </div>
+      <div>
+        <p class="small"><b>En contenedor</b> (Dockerfile del demo)</p>
+        <div class="code-title">Dockerfile</div>
+<pre><code class="language-dockerfile">FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+
+CMD ["pytest", "-q"]</code></pre>
+        <div class="terminal xs" style="margin-top:14px"><span class="p">$</span> docker build -t unit-testing-demo:0.0.1 .
+<span class="p">$</span> docker run --rm unit-testing-demo:0.0.1</div>
+        <p class="xs muted" style="margin-top:10px">El contenedor garantiza las mismas versiones en todos los equipos y en CI. El código de salida de pytest (0 = éxito) es lo que leerá el pipeline.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>API de ML</span><span class="n"></span></div>
+</section>
+
+<!-- ============================ DÓNDE EN MLOPS ============================ -->
+<section class="slide">
+  <header><h2>¿Dónde aplicar pruebas en MLOps?</h2><span class="kicker">Ciclo de vida</span></header>
+  <div class="body" style="padding-top:26px">
+    <div class="cycle">
+      <div class="stage"><h4><span>1</span>Ingesta de datos</h4><ul><li>Esquema y tipos de columnas</li><li>Nulos, duplicados, rangos</li><li>Tamaño mínimo del dataset</li></ul></div>
+      <div class="stage"><h4><span>2</span>Preprocesamiento</h4><ul><li>Transformaciones deterministas</li><li>Mismo resultado en train y serving</li><li>Manejo de categorías nuevas</li></ul></div>
+      <div class="stage"><h4><span>3</span>Entrenamiento</h4><ul><li>Reproducibilidad (semillas)</li><li>El modelo aprende algo (mejor que baseline)</li><li>Tareas de DAGs en Airflow</li></ul></div>
+      <div class="stage"><h4><span>4</span>Validación del modelo</h4><ul><li>Métrica ≥ umbral</li><li>Regresión vs modelo en producción</li><li>Antes de registrar en MLflow</li></ul></div>
+      <div class="stage"><h4><span>5</span>Serving / API</h4><ul><li>Contrato de entrada y salida</li><li>Códigos HTTP y errores</li><li>Carga del artefacto correcto</li></ul></div>
+      <div class="stage"><h4><span>6</span>Contenedor</h4><ul><li>La imagen construye</li><li>Pruebas corren dentro de la imagen</li><li>Endpoint <code class="i">/health</code> responde</li></ul></div>
+      <div class="stage"><h4><span>7</span>Despliegue</h4><ul><li>Manifiestos válidos</li><li>Smoke tests tras desplegar</li><li>Carga con Locust</li></ul></div>
+      <div class="stage"><h4><span>8</span>Monitoreo</h4><ul><li>Métricas expuestas (<code class="i">/metrics</code>)</li><li>Alertas de drift</li><li>Dispara reentrenamiento</li></ul></div>
+    </div>
+    <div class="callout blue small" style="margin-top:20px">Todas estas pruebas ganan valor cuando se ejecutan <b>automáticamente en cada cambio</b> → eso es la <b>integración continua</b>.</div>
+  </div>
+  <div class="footer"><span>Pruebas en MLOps</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Buenas prácticas y límites</h2><span class="kicker">Resumen parte 1</span></header>
+  <div class="body">
+    <div class="cols">
+      <div class="card ok" style="padding:22px 26px">
+        <h3>Buenas prácticas</h3>
+        <ul class="small" style="margin-top:10px">
+          <li>Nombres que describen el caso: <code class="i">test_&lt;función&gt;_&lt;escenario&gt;</code></li>
+          <li>Datos pequeños y representativos (fixtures)</li>
+          <li>Probar bordes y errores esperados, no solo el caso feliz</li>
+          <li>Modelos y servicios externos reemplazados por falsos</li>
+          <li>Separar pruebas rápidas de lentas con marcadores</li>
+          <li>Ejecutarlas en CI en cada push y pull request</li>
+        </ul>
+      </div>
+      <div class="card bad" style="padding:22px 26px">
+        <h3 style="color:var(--bad)">Limitaciones</h3>
+        <ul class="small" style="margin-top:10px">
+          <li>No todos los errores se capturan con pruebas unitarias</li>
+          <li>Las pruebas con datos reales pueden volverse lentas o frágiles</li>
+          <li>Hay que mantenerlas cuando cambia la lógica de negocio</li>
+          <li>Una prueba que nunca falla tampoco protege: verificar que <b>sí falla</b> cuando el código está mal</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Pruebas unitarias</span><span class="n"></span></div>
+</section>
+
+<!-- ============================ SECCIÓN 2 ============================ -->
+<section class="slide section">
+  <div class="wrap">
+    <div class="num">02</div>
+    <h1>Integración continua con GitHub Actions</h1>
+    <p>Que las pruebas se ejecuten solas en cada cambio y que solo el código validado se convierta en una imagen publicable.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <header><h2>CI y CD</h2><span class="kicker">Conceptos</span></header>
+  <div class="body">
+    <div class="flow" style="margin-bottom:26px;height:120px">
+      <div class="step s-blue"><b>Código</b><span>commit / PR</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-navy"><b>Pruebas</b><span>pytest</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-navy"><b>Build</b><span>imagen Docker</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-navy"><b>Publicar</b><span>Docker Hub</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-gold"><b>Desplegar</b><span>Kubernetes</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:0;margin:-14px 0 24px;text-align:center;font-weight:700;font-size:18px">
+      <div style="border-top:4px solid var(--navy);padding-top:6px;color:var(--navy);margin-right:20px">CI · hoy · GitHub Actions</div>
+      <div style="border-top:4px solid var(--gold);padding-top:6px;color:#9a6c00">CD · próxima clase · Argo CD</div>
+    </div>
+    <div class="cols c-3" style="height:auto">
+      <div class="card blue"><span class="tag">CI</span><h3>Integración continua</h3><p>Cada cambio se integra a la rama principal y se valida automáticamente (pruebas, build). Detecta problemas en minutos.</p></div>
+      <div class="card gold"><span class="tag">CD</span><h3>Entrega continua</h3><p>El artefacto validado (imagen) queda siempre listo para desplegar; el paso a producción puede ser manual.</p></div>
+      <div class="card gold"><span class="tag">CD</span><h3>Despliegue continuo</h3><p>Cada cambio validado llega a producción automáticamente, sin intervención humana.</p></div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>GitHub Actions: conceptos clave</h2><span class="kicker">Vocabulario</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <table class="t" style="font-size:18px">
+        <tr><td style="width:30%"><b>Workflow</b></td><td>Proceso automatizado en <code class="i">.github/workflows/*.yml</code></td></tr>
+        <tr><td><b>Event</b></td><td>Lo que lo dispara: <code class="i">push</code>, <code class="i">pull_request</code>, <code class="i">schedule</code>, manual…</td></tr>
+        <tr><td><b>Job</b></td><td>Conjunto de pasos en una máquina. Los jobs corren en paralelo salvo <code class="i">needs</code></td></tr>
+        <tr><td><b>Step</b></td><td>Un comando (<code class="i">run</code>) o una acción (<code class="i">uses</code>)</td></tr>
+        <tr><td><b>Runner</b></td><td>Máquina virtual que ejecuta el job (<code class="i">ubuntu-latest</code>)</td></tr>
+        <tr><td><b>Action</b></td><td>Paso reutilizable del Marketplace: <code class="i">actions/checkout@v4</code></td></tr>
+        <tr><td><b>Secret</b></td><td>Credencial cifrada: <code class="i">${{ secrets.X }}</code></td></tr>
+      </table>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:10px">
+        <div class="step s-navy" style="border-radius:12px;padding:14px 18px;font-size:19px"><b style="color:var(--gold)">Workflow</b><span> disparado por un <b style="color:#fff">event</b></span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-left:28px">
+          <div class="card blue" style="padding:12px 14px"><span class="tag">Job · runner</span>
+            <p style="font-size:16px">step 1 · checkout<br>step 2 · setup-python<br>step 3 · pytest</p></div>
+          <div class="card blue" style="padding:12px 14px"><span class="tag">Job · runner</span>
+            <p style="font-size:16px">step 1 · checkout<br>step 2 · login<br>step 3 · build &amp; push</p></div>
+        </div>
+        <p class="xs muted" style="padding-left:28px">Cada job arranca en una máquina limpia: hay que volver a hacer checkout e instalar dependencias.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Un primer workflow</h2><span class="kicker">.github/workflows/github-actions-demo.yml</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div>
+        <ul class="small">
+          <li><code class="i">on</code>: se ejecuta con cada <b>push a main</b></li>
+          <li><code class="i">runs-on</code>: máquina Ubuntu de GitHub</li>
+          <li><code class="i">uses: actions/checkout@v4</code> clona el repositorio en el runner</li>
+          <li>Las expresiones <code class="i">${{ github.* }}</code> exponen el contexto: rama, autor, evento</li>
+        </ul>
+        <div class="callout small" style="margin-top:18px">Los resultados se ven en la pestaña <b>Actions</b> del repositorio, con el log de cada paso.</div>
+      </div>
+      <div class="code-sm">
+<pre><code class="language-yaml">name: GitHub Actions Demo
+run-name: ${{ github.actor }} está probando GitHub Actions 🚀
+on:
+  push:
+    branches:
+      - "main"
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 Evento ${{ github.event_name }}."
+      - run: echo "🐧 Ejecutando en ${{ runner.os }}"
+      - run: echo "🔎 Rama ${{ github.ref }} de ${{ github.repository }}."
+      - name: Consultar el código del repositorio
+        uses: actions/checkout@v4
+      - name: Listar archivos en el repositorio
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 Estado del trabajo ${{ job.status }}."</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Nuestro pipeline: tests → imagen en Docker Hub</h2><span class="kicker">Flujo</span></header>
+  <div class="body">
+    <div class="flow" style="height:150px;margin-bottom:22px">
+      <div class="step s-blue"><b>Evento</b><span>push o PR que toca<br><code class="i">unit_testing/demo_app/**</code></span></div>
+      <div class="arrow">→</div>
+      <div class="step s-navy"><b>job: unit-tests</b><span>checkout · Python 3.11 · pip install · pytest</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-gold"><b>¿push a main?</b><span><code class="i">needs</code> + <code class="i">if</code></span></div>
+      <div class="arrow">→</div>
+      <div class="step s-ok"><b>job: publish-dockerhub</b><span>login · build · push<br><code class="i">:latest</code> y <code class="i">:&lt;sha&gt;</code></span></div>
+    </div>
+    <table class="t small">
+      <tr><th>Situación</th><th>unit-tests</th><th>publish-dockerhub</th></tr>
+      <tr><td>Pull request hacia <code class="i">main</code></td><td><span class="pill ok">se ejecuta</span></td><td><span class="pill bad">omitido</span></td></tr>
+      <tr><td>Push a <code class="i">feature/**</code></td><td><span class="pill ok">se ejecuta</span></td><td><span class="pill bad">omitido</span></td></tr>
+      <tr><td>Push / merge a <code class="i">main</code> con tests en verde</td><td><span class="pill ok">se ejecuta</span></td><td><span class="pill ok">publica imagen</span></td></tr>
+      <tr><td>Push a <code class="i">main</code> con algún test fallando</td><td><span class="pill bad">falla</span></td><td><span class="pill bad">no corre</span></td></tr>
+      <tr><td>Cambio fuera de la carpeta monitoreada</td><td colspan="2" class="muted">el workflow no se dispara (filtro <code class="i">paths</code>)</td></tr>
+    </table>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Workflow (1/2): disparadores y variables</h2><span class="kicker">templates/ci-cd-unit-tests-dockerhub.yml</span></header>
+  <div class="body">
+    <div class="cols c-45-55">
+      <div class="code-sm">
+<pre><code class="language-yaml">name: CI Unit Tests + DockerHub Publish
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "Niveles/3/CICD/unit_testing/demo_app/**"
+      - ".github/workflows/ci-cd-unit-tests-dockerhub.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "Niveles/3/CICD/unit_testing/demo_app/**"
+      - ".github/workflows/ci-cd-unit-tests-dockerhub.yml"
+
+env:
+  PYTHON_VERSION: "3.11"
+  APP_PATH: "Niveles/3/CICD/unit_testing/demo_app"
+  IMAGE_NAME: "&lt;dockerhub-usuario&gt;/mlops-unit-testing-demo"</code></pre>
+      </div>
+      <div>
+        <ul class="small">
+          <li><code class="i">branches</code>: en qué ramas reacciona. <code class="i">feature/**</code> cubre cualquier rama de feature</li>
+          <li><code class="i">paths</code>: solo se dispara si cambian esos archivos. Clave en un <b>monorepo</b> con varios proyectos (como este curso)</li>
+          <li>Se incluye el propio workflow en <code class="i">paths</code> para que corra al editarlo</li>
+          <li><code class="i">env</code>: variables globales; se usan como <code class="i">$APP_PATH</code> en shell o <code class="i">${{ env.APP_PATH }}</code> en YAML</li>
+        </ul>
+        <div class="callout small" style="margin-top:14px">Para su proyecto: cambiar <code class="i">paths</code>, <code class="i">APP_PATH</code> e <code class="i">IMAGE_NAME</code>.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Workflow (2/2): jobs</h2><span class="kicker">templates/ci-cd-unit-tests-dockerhub.yml</span></header>
+  <div class="body" style="padding-top:22px">
+    <div class="cols c-45-55 code-sm" style="gap:24px">
+      <div>
+<pre><code class="language-yaml">jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r $APP_PATH/requirements.txt
+
+      - name: Run unit tests
+        run: |
+          cd $APP_PATH
+          pytest -q</code></pre>
+        <p class="xs muted" style="margin-top:8px">Si <code class="i">pytest</code> sale con código ≠ 0, el step falla y el job queda en rojo.</p>
+      </div>
+      <div>
+<pre><code class="language-yaml">  publish-dockerhub:
+    needs: unit-tests          # espera a que pasen
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' &amp;&amp; github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.APP_PATH }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Secrets, tags y activación</h2><span class="kicker">Configuración</span></header>
+  <div class="body">
+    <div class="cols c-3" style="height:auto">
+      <div class="card">
+        <span class="tag">1 · Token de Docker Hub</span>
+        <h3>Docker Hub</h3>
+        <p>Account Settings → <b>Personal access tokens</b> → generar token con permiso <i>Read &amp; Write</i>. Usar el token, nunca la contraseña.</p>
+      </div>
+      <div class="card">
+        <span class="tag">2 · Secrets del repo</span>
+        <h3>GitHub</h3>
+        <p><b>Settings → Secrets and variables → Actions</b> → crear:<br><code class="i">DOCKERHUB_USERNAME</code><br><code class="i">DOCKERHUB_TOKEN</code></p>
+      </div>
+      <div class="card">
+        <span class="tag">3 · Activar el workflow</span>
+        <h3>Copiar la plantilla</h3>
+        <p>GitHub solo lee workflows en <code class="i">.github/workflows/</code> en la raíz del repositorio.</p>
+      </div>
+    </div>
+    <div class="terminal xs" style="margin-top:22px"><span class="p">$</span> mkdir -p .github/workflows
+<span class="p">$</span> cp Niveles/3/CICD/github_actions/templates/ci-cd-unit-tests-dockerhub.yml .github/workflows/</div>
+    <div class="cols" style="height:auto;margin-top:20px">
+      <div class="callout small"><b>¿Por qué dos tags?</b> <code class="i">:latest</code> es cómodo pero cambia; <code class="i">:&lt;sha&gt;</code> es inmutable y trazable al commit exacto. Argo CD usará tags inmutables.</div>
+      <div class="callout blue small"><b>Secrets:</b> se enmascaran en los logs y <b>no</b> se pasan a workflows disparados por PRs desde forks.</div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Flujo de trabajo con ramas y Pull Requests</h2><span class="kicker">Proceso</span></header>
+  <div class="body">
+    <div class="flow" style="height:130px;margin-bottom:26px">
+      <div class="step s-blue"><b>1 · Rama</b><span><code class="i">git switch -c feature/nueva-validacion</code></span></div>
+      <div class="arrow">→</div>
+      <div class="step s-blue"><b>2 · Push</b><span>corren los tests en la rama</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-navy"><b>3 · Pull Request</b><span>tests como check obligatorio</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-ok"><b>4 · Merge a main</b><span>tests + imagen publicada</span></div>
+    </div>
+    <div class="cols">
+      <div>
+        <p class="small"><b>Proteger la rama main</b></p>
+        <p class="small muted">Settings → Branches (o Rules) → regla para <code class="i">main</code>:</p>
+        <ul class="small">
+          <li>Requerir pull request antes de merge</li>
+          <li>Requerir <b>status checks</b>: seleccionar <code class="i">unit-tests</code></li>
+        </ul>
+        <p class="small">Así es imposible integrar código con pruebas en rojo.</p>
+      </div>
+      <div>
+        <div class="card" style="padding:16px 20px">
+          <p style="font-size:18px;color:var(--ink);margin-bottom:10px"><b>Vista en el PR</b></p>
+          <p style="font-size:17px;margin-bottom:6px"><span class="pill ok">✓</span>&nbsp; CI Unit Tests + DockerHub Publish / unit-tests</p>
+          <p style="font-size:17px;margin-bottom:6px"><span class="pill navy">–</span>&nbsp; CI Unit Tests + DockerHub Publish / publish-dockerhub <span class="muted">(skipped)</span></p>
+          <p style="font-size:17px;margin:12px 0 0;color:var(--ok)"><b>All checks have passed</b> → Merge pull request</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Integración continua</span><span class="n"></span></div>
+</section>
+
+<!-- ============================ ACTIVIDADES ============================ -->
+<section class="slide section">
+  <div class="wrap">
+    <div class="num">03</div>
+    <h1>Actividades propuestas</h1>
+    <p>Construir pruebas propias y automatizarlas con un workflow que publique la imagen.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <header><h2>Actividad 1 · Pruebas unitarias</h2><span class="kicker">unit_testing/README.md</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <p class="small">Construya una mini API o script Python de <b>preprocesamiento</b> con al menos 3 funciones, por ejemplo:</p>
+        <ul class="small">
+          <li>limpieza de texto</li>
+          <li>validación de rangos numéricos</li>
+          <li>transformación de features</li>
+        </ul>
+        <p class="small" style="margin-top:12px">Exponerlas en un endpoint FastAPI y probarlo con <code class="i">TestClient</code>, aislando el modelo con un fixture.</p>
+      </div>
+      <div>
+        <p class="small"><b>Requisitos</b></p>
+        <ol class="steps-num small">
+          <li><code class="i">app.py</code> (o módulo equivalente)</li>
+          <li>carpeta <code class="i">tests/</code> con <b>mínimo 6 pruebas</b></li>
+          <li>al menos 1 caso de error con <code class="i">pytest.raises</code></li>
+          <li><code class="i">Dockerfile</code> que ejecute <code class="i">pytest</code></li>
+          <li>ejecución exitosa en contenedor</li>
+        </ol>
+        <div class="callout small" style="margin-top:10px"><b>Aprobación:</b> pytest al 100%, casos normales y de borde, contenedor sin intervención manual.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Actividades</span><span class="n"></span></div>
+</section>
+
+<section class="slide">
+  <header><h2>Actividad 2 · GitHub Actions</h2><span class="kicker">github_actions/README.md</span></header>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <ol class="steps-num small">
+          <li>Crear un módulo Python propio con pruebas unitarias (Actividad 1)</li>
+          <li>Ajustar en el workflow el path monitoreado (<code class="i">paths</code>) y <code class="i">APP_PATH</code></li>
+          <li>Cambiar <code class="i">IMAGE_NAME</code> por su usuario/repositorio de Docker Hub</li>
+          <li>Crear un Pull Request y validar que ejecuta las pruebas</li>
+          <li>Hacer merge a <code class="i">main</code> y validar que publica la imagen</li>
+        </ol>
+      </div>
+      <div>
+        <p class="small"><b>Evidencias</b></p>
+        <div style="display:grid;gap:12px">
+          <div class="card ok"><p style="color:var(--ink)">Captura de la ejecución exitosa del job <code class="i">unit-tests</code></p></div>
+          <div class="card ok"><p style="color:var(--ink)">Captura del job <code class="i">publish-dockerhub</code> en <code class="i">main</code></p></div>
+          <div class="card ok"><p style="color:var(--ink)">Enlace a la imagen en Docker Hub con tags <code class="i">latest</code> y <code class="i">&lt;sha&gt;</code></p></div>
+        </div>
+        <div class="callout blue small" style="margin-top:14px"><b>Reto:</b> haga fallar una prueba a propósito en un PR y muestre que el merge queda bloqueado.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Actividades</span><span class="n"></span></div>
+</section>
+
+<!-- ============================ PRÓXIMA CLASE ============================ -->
+<section class="slide">
+  <header><h2>Próxima clase: CD con Argo CD y GitOps</h2><span class="kicker">Nivel 4 · argo</span></header>
+  <div class="body">
+    <p class="small">Hoy el pipeline termina con una imagen en Docker Hub. ¿Cómo llega esa imagen al clúster de Kubernetes <b>sin <code class="i">kubectl apply</code> manual</b>?</p>
+    <div class="flow" style="height:140px;margin:18px 0 24px">
+      <div class="step s-navy"><b>GitHub Actions</b><span>tests + build + push<br><code class="i">imagen:&lt;sha&gt;</code></span></div>
+      <div class="arrow">→</div>
+      <div class="step s-gold"><b>Git (manifiestos)</b><span>se actualiza el tag en <code class="i">deployment.yaml</code></span></div>
+      <div class="arrow">→</div>
+      <div class="step s-gold"><b>Argo CD</b><span>detecta el cambio y sincroniza</span></div>
+      <div class="arrow">→</div>
+      <div class="step s-ok"><b>Kubernetes</b><span>nueva versión de la API desplegada</span></div>
+    </div>
+    <div class="cols c-3" style="height:auto">
+      <div class="card"><h3>GitOps</h3><p>Git como fuente única de verdad: el estado deseado del clúster vive en el repositorio.</p></div>
+      <div class="card"><h3>Estado objetivo vs en vivo</h3><p>Argo CD compara lo que dice Git con lo que corre en el clúster y los alinea (sync).</p></div>
+      <div class="card"><h3>Para preparar</h3><p>Clúster local (kind/minikube), <code class="i">kubectl</code> y la imagen publicada en Docker Hub de la Actividad 2.</p></div>
+    </div>
+  </div>
+  <div class="footer"><span>Siguiente: Niveles/4/argo</span><span class="n"></span></div>
+</section>
+
+<section class="slide cover">
+  <div class="wrap">
+    <div class="eyebrow">Resumen</div>
+    <h1 style="font-size:54px">Sin pruebas no hay<br>automatización confiable</h1>
+    <ul style="font-size:26px;color:#dbe4ee;line-height:1.5;padding-left:28px;max-width:1000px">
+      <li><b style="color:var(--gold)">pytest</b>: assert, raises, parametrize, fixtures y modelos falsos</li>
+      <li>En una API de ML: probar validación, contrato HTTP y modelo por separado</li>
+      <li><b style="color:var(--gold)">GitHub Actions</b>: tests en cada PR, imagen publicada solo desde main en verde</li>
+      <li>Próxima clase: <b style="color:var(--gold)">Argo CD</b> despliega esa imagen con GitOps</li>
+    </ul>
+    <div class="meta">Material: Niveles/3/CICD · Niveles/4/argo</div>
+  </div>
+</section>
+
+</main>
+
+<div id="controls">
+  <button id="prev" aria-label="Anterior">‹</button>
+  <span id="counter"></span>
+  <button id="next" aria-label="Siguiente">›</button>
+  <button id="fs" aria-label="Pantalla completa">⛶</button>
+</div>
+<div id="hint">← → navegar · F pantalla completa · Inicio/Fin</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const total = slides.length;
+    let current = 0;
+
+    slides.forEach((s, i) => {
+      const n = s.querySelector(".footer .n");
+      if (n) n.textContent = (i + 1) + " / " + total;
+    });
+
+    function fit() {
+      const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+      slides.forEach(s => { s.style.transform = "scale(" + scale + ")"; });
+    }
+
+    function show(i) {
+      current = Math.max(0, Math.min(total - 1, i));
+      slides.forEach((s, j) => s.classList.toggle("active", j === current));
+      document.getElementById("counter").textContent = (current + 1) + " / " + total;
+      document.getElementById("progress").style.width = ((current + 1) / total * 100) + "%";
+      history.replaceState(null, "", "#" + (current + 1));
+    }
+
+    document.addEventListener("keydown", e => {
+      if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(current + 1); }
+      else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(current - 1); }
+      else if (e.key === "Home") show(0);
+      else if (e.key === "End") show(total - 1);
+      else if (e.key === "f" || e.key === "F") toggleFs();
+    });
+    document.getElementById("next").onclick = () => show(current + 1);
+    document.getElementById("prev").onclick = () => show(current - 1);
+    document.getElementById("fs").onclick = toggleFs;
+
+    let touchX = null;
+    document.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener("touchend", e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+      touchX = null;
+    });
+
+    function toggleFs() {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else document.exitFullscreen();
+    }
+
+    // Reduce la letra de bloques de código/terminal que no caben en su columna
+    function shrinkCode() {
+      slides.forEach(s => {
+        const wasActive = s.classList.contains("active");
+        s.classList.add("active");
+        s.querySelectorAll("pre code, .terminal").forEach(el => {
+          el.style.fontSize = "";
+          let size = parseFloat(getComputedStyle(el).fontSize);
+          while (el.scrollWidth > el.clientWidth + 1 && size > 11) {
+            size -= 0.5;
+            el.style.fontSize = size + "px";
+          }
+        });
+        if (!wasActive) s.classList.remove("active");
+      });
+    }
+
+    window.addEventListener("resize", fit);
+    fit();
+    const start = parseInt(location.hash.slice(1), 10);
+    show(Number.isFinite(start) ? start - 1 : 0);
+
+    setTimeout(() => { document.getElementById("hint").style.opacity = 0; }, 5000);
+    if (window.hljs) hljs.highlightAll();
+    shrinkCode();
+    if (document.fonts) document.fonts.ready.then(shrinkCode);
+  })();
+</script>
+</body>
+</html>
